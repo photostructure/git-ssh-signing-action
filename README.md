@@ -1,12 +1,29 @@
 # Git SSH Signing Action
 
+**The simplest way to get verified commits from your GitHub Actions workflows.** 🤖✍️
+
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Git%20SSH%20Signing%20Action-blue?logo=github)](https://github.com/marketplace/actions/git-ssh-signing-action)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/ci.yml/badge.svg)](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/ci.yml)
 [![Check dist/](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/check-dist.yml)
 [![CodeQL](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/codeql-analysis.yml)
 
-A GitHub Action that configures SSH signing keys for secure Git commit and tag signing in automated CI/CD workflows.
+A GitHub Action that handles SSH (instead of GPG) signing key setup, enabling your automated workflows to create verified commits and tags that appear with GitHub's green checkmark.
+
+## 🎯 Why Use This?
+
+Transform your automated commits from unverified to verified:
+
+<p align="center">
+  <img src="doc/unverified-to-verified.svg" alt="Verified" height="32">
+</p>
+
+Verified commits provide:
+- **Trust** - Cryptographic proof that commits come from your automation
+- **Security** - Protection against commit tampering and impersonation
+- **Compliance** - Ability to enforce signed commits on protected branches
+
+[Learn more about commit signature verification →](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
 
 ## ✨ Features
 
@@ -368,3 +385,4 @@ for details.
 - [GitHub SSH Commit Verification](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#ssh-commit-signature-verification)
 - [Git SSH Signing Documentation](https://git-scm.com/docs/git-config#Documentation/git-config.txt-gpgformat)
 - [GitHub Actions Encrypted Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
+- [GitHub SSH key setup](https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key#telling-git-about-your-ssh-key)

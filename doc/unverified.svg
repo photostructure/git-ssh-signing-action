@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60.009mm" height="17.621mm" version="1.1" viewBox="0 0 60.009 17.621" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(-145.26 -138.38)">
+  <rect x="145.76" y="138.88" width="59.009" height="16.621" ry="8.3107" fill="none" stroke="#9a6701" style="paint-order:stroke fill markers"/>
+  <text x="175.4129" y="151.20123" fill="#9a6701" font-family="'Noto Sans'" font-size="9.9736px" font-weight="bold" text-align="center" text-anchor="middle" style="paint-order:stroke fill markers" xml:space="preserve"><tspan x="175.4129" y="151.20123" fill="#9a6701" font-family="'Noto Sans'" font-weight="normal">Unverified</tspan></text>
+ </g>
+</svg>
