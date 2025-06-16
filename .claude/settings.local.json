@@ -26,7 +26,9 @@
       "Bash(ls:*)",
       "WebFetch(domain:feathericons.com)",
       "Bash(npm audit:*)",
-      "Bash(git remote get-url:*)"
+      "Bash(git remote get-url:*)",
+      "Bash(gh run view:*)",
+      "WebFetch(domain:json.schemastore.org)"
     ],
     "deny": []
   }
