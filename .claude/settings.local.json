@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(npm install)",
+      "Bash(npm run all:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run:*)",
+      "Bash(npm test)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:docs.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm test:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm t)",
+      "Bash(rg:*)",
+      "Bash(npm t:*)",
+      "Bash(npx tsx:*)",
+      "Bash(grep:*)",
+      "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 ACTIONS_STEP_DEBUG=true npx jest __tests__/ssh.test.ts --verbose 2 >& 1)",
+      "Bash(grep:*)",
+      "Bash(true)",
+      "Bash(ls:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:feathericons.com)",
+      "Bash(npm audit:*)",
+      "Bash(git remote get-url:*)"
+    ],
+    "deny": []
+  }
+}
