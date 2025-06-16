@@ -2,9 +2,8 @@ name: Git SSH Signing Action
 description: Set up git commit and tag signing with ssh signing keys for GitHub Actions workflows
 author: PhotoStructure
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: key
+  icon: lock
   color: blue
 
 # Define your inputs here.
