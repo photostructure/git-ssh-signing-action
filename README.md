@@ -6,9 +6,7 @@
 [![Check dist/](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/check-dist.yml)
 [![CodeQL](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/codeql-analysis.yml)
 
-A GitHub Action for setting up SSH commit and tag signing in CI/CD workflows.
-This action provides a simple, secure way to configure SSH-based Git signing for
-automated commits and releases.
+A GitHub Action that configures SSH signing keys for secure Git commit and tag signing in automated CI/CD workflows.
 
 ## ✨ Features
 
