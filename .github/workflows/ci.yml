@@ -32,10 +32,6 @@ jobs:
         id: npm-ci
         run: npm ci
 
-      - name: Check Format
-        id: npm-format-check
-        run: npm run format:check
-
       - name: Lint
         id: npm-lint
         run: npm run lint
@@ -53,12 +49,27 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
+      - name: Generate test SSH key
+        id: generate-key
+        run: |
+          ssh-keygen -t ed25519 -f test_key -N "" -C "test@example.com"
+          echo "SSH_KEY<<EOF" >> $GITHUB_ENV
+          cat test_key >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Test Local Action
         id: test-action
         uses: ./
         with:
-          milliseconds: 2000
+          ssh-signing-key: ${{ env.SSH_KEY }}
+          git-user-name: "Test User"
+          git-user-email: "test@example.com"
 
-      - name: Print Output
-        id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
+      - name: Verify outputs
+        id: verify
+        run: |
+          echo "SSH key path: ${{ steps.test-action.outputs.ssh-key-path }}"
+          echo "Key fingerprint: ${{ steps.test-action.outputs.key-fingerprint }}"
+          # Verify git config was set
+          git config --get user.signingkey
+          git config --get gpg.format

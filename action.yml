@@ -1,24 +1,54 @@
-name: The name of your action here
-description: Provide a description here
-author: Your name or organization here
+name: Git SSH Signing Action
+description: Set up git commit and tag signing with ssh signing keys for GitHub Actions workflows
+author: PhotoStructure
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: heart
-  color: red
+  icon: key
+  color: blue
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: Your input description here
+  ssh-signing-key:
+    description: SSH private signing key to use with signed git commits and git tags
     required: true
-    default: '1000'
+  git-user-name:
+    description: Git user.name for commits. Must match the SSH key's user name and GitHub username
+    required: true
+  git-user-email:
+    description: Git user.email for commits. Must match the email associated with the GitHub username
+    required: true
+  ssh-key-path:
+    description: Custom path for SSH signing key (defaults to ~/.ssh/signing_key)
+    required: false
+    default: "~/.ssh/signing_key"
+  git-commit-gpgsign:
+    description: Sign all commits (defaults to true)
+    required: false
+    default: "true"
+  git-tag-gpgsign:
+    description: Sign all tags (defaults to true)
+    required: false
+    default: "true"
+  git-push-gpgsign:
+    description: Sign pushes (if-asked, true, or false)
+    required: false
+    default: "if-asked"
+  create-allowed-signers:
+    description: Create allowed signers file for signature verification
+    required: false
+    default: "true"
 
 # Define your outputs here.
 outputs:
-  time:
-    description: Your output description here
+  ssh-key-path:
+    description: Path to the installed SSH signing key
+  public-key:
+    description: The SSH public key content
+  key-fingerprint:
+    description: The SSH key fingerprint (SHA256)
 
 runs:
   using: node20
-  main: dist/index.js
+  main: dist/main.js
+  post: dist/cleanup.js
