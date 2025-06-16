@@ -27,12 +27,11 @@ Verified commits provide:
 
 ## ✨ Features
 
-- **🔐 Secure SSH Key Management**: Safely installs and configures SSH signing keys
-- **🎯 Complete Git Configuration**: Sets up user identity, signing format, and verification
-- **🧹 Automatic Cleanup**: Removes keys and configuration after workflow completion
-- **🛡️ Security Best Practices**: Proper file permissions and secure key handling
-- **📦 Zero Dependencies**: No external tools required beyond standard Git and SSH
-- **🔄 Automatic Cleanup**: Post-action credentials cleanup runs automatically
+- **🔐 Secure Key Management**: Installs SSH keys with proper permissions (0600)
+- **🎯 Complete Git Setup**: Configures user identity and SSH signing format
+- **🧹 Automatic Cleanup**: Removes keys and restores Git config after workflow
+- **🛡️ GitHub Integration**: Works with branch protection and verified commits
+- **📦 Zero Dependencies**: Uses only standard Git and OpenSSH tools
 
 ## 📋 Requirements
 
