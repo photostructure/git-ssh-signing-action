@@ -19,6 +19,14 @@ automated commits and releases.
 - **📦 Zero Dependencies**: No external tools required beyond standard Git and SSH
 - **🔄 Automatic Cleanup**: Post-action credentials cleanup runs automatically
 
+## 📋 Requirements
+
+- **Platform**: Linux or macOS runners only (`ubuntu-latest`, `macos-latest`)
+- **Git**: Version 2.34.0 or later (for SSH signing support)
+- **OpenSSH**: Standard installation with `ssh-keygen` and `ssh-agent`
+
+> **⚠️ Windows Not Supported**: This action requires POSIX file permissions and SSH agent functionality that are not available on Windows runners. Use `ubuntu-latest` or `macos-latest` for your workflows.
+
 ## 🚀 Quick Start
 
 ### Basic Usage
