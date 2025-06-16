@@ -1,306 +1,364 @@
-# Create a GitHub Action Using TypeScript
+# Git SSH Signing Action
 
-[![GitHub Super-Linter](https://github.com/actions/typescript-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
-![CI](https://github.com/actions/typescript-action/actions/workflows/ci.yml/badge.svg)
-[![Check dist/](https://github.com/actions/typescript-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/actions/typescript-action/actions/workflows/check-dist.yml)
-[![CodeQL](https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml)
-[![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Git%20SSH%20Signing%20Action-blue?logo=github)](https://github.com/marketplace/actions/git-ssh-signing-action)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/ci.yml/badge.svg)](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/ci.yml)
+[![Check dist/](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/check-dist.yml)
+[![CodeQL](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/codeql-analysis.yml)
 
-Use this template to bootstrap the creation of a TypeScript action. :rocket:
+A GitHub Action for setting up SSH commit and tag signing in CI/CD workflows.
+This action provides a simple, secure way to configure SSH-based Git signing for
+automated commits and releases.
 
-This template includes compilation support, tests, a validation workflow,
-publishing, and versioning guidance.
+## ✨ Features
 
-If you are new, there's also a simpler introduction in the
-[Hello world JavaScript action repository](https://github.com/actions/hello-world-javascript-action).
+- **🔐 Secure SSH Key Management**: Safely installs and configures SSH signing keys
+- **🎯 Complete Git Configuration**: Sets up user identity, signing format, and verification
+- **🧹 Automatic Cleanup**: Removes keys and configuration after workflow completion
+- **🛡️ Security Best Practices**: Proper file permissions and secure key handling
+- **📦 Zero Dependencies**: No external tools required beyond standard Git and SSH
+- **🔄 Automatic Cleanup**: Post-action credentials cleanup runs automatically
 
-## Create Your Own Action
+## 🚀 Quick Start
 
-To create your own action, you can use this repository as a template! Just
-follow the below instructions:
-
-1. Click the **Use this template** button at the top of the repository
-1. Select **Create a new repository**
-1. Select an owner and name for your new repository
-1. Click **Create repository**
-1. Clone your new repository
-
-> [!IMPORTANT]
->
-> Make sure to remove or update the [`CODEOWNERS`](./CODEOWNERS) file! For
-> details on how to use this file, see
-> [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
-
-## Initial Setup
-
-After you've cloned the repository to your local machine or codespace, you'll
-need to perform some initial setup steps before you can develop your action.
-
-> [!NOTE]
->
-> You'll need to have a reasonably modern version of
-> [Node.js](https://nodejs.org) handy (20.x or later should work!). If you are
-> using a version manager like [`nodenv`](https://github.com/nodenv/nodenv) or
-> [`fnm`](https://github.com/Schniz/fnm), this template has a `.node-version`
-> file at the root of the repository that can be used to automatically switch to
-> the correct version when you `cd` into the repository. Additionally, this
-> `.node-version` file is used by GitHub Actions in any `actions/setup-node`
-> actions.
-
-1. :hammer_and_wrench: Install the dependencies
-
-   ```bash
-   npm install
-   ```
-
-1. :building_construction: Package the TypeScript for distribution
-
-   ```bash
-   npm run bundle
-   ```
-
-1. :white_check_mark: Run the tests
-
-   ```bash
-   $ npm test
-
-   PASS  ./index.test.js
-     ✓ throws invalid number (3ms)
-     ✓ wait 500 ms (504ms)
-     ✓ test runs (95ms)
-
-   ...
-   ```
-
-## Update the Action Metadata
-
-The [`action.yml`](action.yml) file defines metadata about your action, such as
-input(s) and output(s). For details about this file, see
-[Metadata syntax for GitHub Actions](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions).
-
-When you copy this repository, update `action.yml` with the name, description,
-inputs, and outputs for your action.
-
-## Update the Action Code
-
-The [`src/`](./src/) directory is the heart of your action! This contains the
-source code that will be run when your action is invoked. You can replace the
-contents of this directory with your own code.
-
-There are a few things to keep in mind when writing your action code:
-
-- Most GitHub Actions toolkit and CI/CD operations are processed asynchronously.
-  In `main.ts`, you will see that the action is run in an `async` function.
-
-  ```javascript
-  import * as core from '@actions/core'
-  //...
-
-  async function run() {
-    try {
-      //...
-    } catch (error) {
-      core.setFailed(error.message)
-    }
-  }
-  ```
-
-  For more information about the GitHub Actions toolkit, see the
-  [documentation](https://github.com/actions/toolkit/blob/master/README.md).
-
-So, what are you waiting for? Go ahead and start customizing your action!
-
-1. Create a new branch
-
-   ```bash
-   git checkout -b releases/v1
-   ```
-
-1. Replace the contents of `src/` with your action code
-1. Add tests to `__tests__/` for your source code
-1. Format, test, and build the action
-
-   ```bash
-   npm run all
-   ```
-
-   > This step is important! It will run [`rollup`](https://rollupjs.org/) to
-   > build the final JavaScript action code with all dependencies included. If
-   > you do not run this step, your action will not work correctly when it is
-   > used in a workflow.
-
-1. (Optional) Test your action locally
-
-   The [`@github/local-action`](https://github.com/github/local-action) utility
-   can be used to test your action locally. It is a simple command-line tool
-   that "stubs" (or simulates) the GitHub Actions Toolkit. This way, you can run
-   your TypeScript action locally without having to commit and push your changes
-   to a repository.
-
-   The `local-action` utility can be run in the following ways:
-
-   - Visual Studio Code Debugger
-
-     Make sure to review and, if needed, update
-     [`.vscode/launch.json`](./.vscode/launch.json)
-
-   - Terminal/Command Prompt
-
-     ```bash
-     # npx @github/local action <action-yaml-path> <entrypoint> <dotenv-file>
-     npx @github/local-action . src/main.ts .env
-     ```
-
-   You can provide a `.env` file to the `local-action` CLI to set environment
-   variables used by the GitHub Actions Toolkit. For example, setting inputs and
-   event payload data used by your action. For more information, see the example
-   file, [`.env.example`](./.env.example), and the
-   [GitHub Actions Documentation](https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables).
-
-1. Commit your changes
-
-   ```bash
-   git add .
-   git commit -m "My first action is ready!"
-   ```
-
-1. Push them to your repository
-
-   ```bash
-   git push -u origin releases/v1
-   ```
-
-1. Create a pull request and get feedback on your action
-1. Merge the pull request into the `main` branch
-
-Your action is now published! :rocket:
-
-For information about versioning your action, see
-[Versioning](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-in the GitHub Actions toolkit.
-
-## Validate the Action
-
-You can now validate the action by referencing it in a workflow file. For
-example, [`ci.yml`](./.github/workflows/ci.yml) demonstrates how to reference an
-action in the same repository.
+### Basic Usage
 
 ```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v4
+name: Release with SSH Signing
 
-  - name: Test Local Action
-    id: test-action
-    uses: ./
-    with:
-      milliseconds: 1000
+on:
+  push:
+    tags: ["v*"]
 
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.time }}"
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Setup SSH signing
+      - uses: photostructure/git-ssh-signing-action@v1
+        with:
+          ssh-signing-key: ${{ secrets.SSH_SIGNING_KEY }}
+          git-user-name: ${{ secrets.GIT_USER_NAME }}
+          git-user-email: ${{ secrets.GIT_USER_EMAIL }}
+
+      # Your build and release steps here
+      - run: npm ci
+      - run: npm version patch
+      - run: git push origin main --follow-tags
+
+      # Cleanup runs automatically - no need for explicit cleanup step!
 ```
 
-For example workflow runs, check out the
-[Actions tab](https://github.com/actions/typescript-action/actions)! :rocket:
-
-## Usage
-
-After testing, you can create version tag(s) that developers can use to
-reference different stable versions of your action. For more information, see
-[Versioning](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-in the GitHub Actions toolkit.
-
-To include the action in a workflow in another repository, you can use the
-`uses` syntax with the `@` symbol to reference a specific branch, tag, or commit
-hash.
+### Advanced Usage with Custom Key Path
 
 ```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v4
-
-  - name: Test Local Action
-    id: test-action
-    uses: actions/typescript-action@v1 # Commit with the `v1` tag
-    with:
-      milliseconds: 1000
-
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.time }}"
+- uses: photostructure/git-ssh-signing-action@v1
+  with:
+    ssh-signing-key: ${{ secrets.SSH_SIGNING_KEY }}
+    git-user-name: "Release Bot"
+    git-user-email: "bot@example.com"
+    ssh-key-path: "/tmp/my-signing-key"
+# No cleanup step needed - it runs automatically!
 ```
 
-## Publishing a New Release
+## 📋 Inputs
 
-This project includes a helper script, [`script/release`](./script/release)
-designed to streamline the process of tagging and pushing new releases for
-GitHub Actions.
+| Input                    | Description                                            | Required | Default              |
+| ------------------------ | ------------------------------------------------------ | -------- | -------------------- |
+| `ssh-signing-key`        | SSH private key for signing commits and tags           | ✅ Yes   | -                    |
+| `git-user-name`          | Git user.name for commits                              | ✅ Yes   | -                    |
+| `git-user-email`         | Git user.email for commits                             | ✅ Yes   | -                    |
+| `ssh-key-path`           | Custom path for SSH signing key                        | ❌ No    | `~/.ssh/signing_key` |
+| `git-commit-gpgsign`     | Sign all commits                                       | ❌ No    | `true`               |
+| `git-tag-gpgsign`        | Sign all tags                                          | ❌ No    | `true`               |
+| `git-push-gpgsign`       | Sign pushes (`if-asked`, `true`, or `false`)           | ❌ No    | `if-asked`           |
+| `create-allowed-signers` | Create allowed signers file for signature verification | ❌ No    | `true`               |
 
-GitHub Actions allows users to select a specific version of the action to use,
-based on release tags. This script simplifies this process by performing the
-following steps:
+## 📤 Outputs
 
-1. **Retrieving the latest release tag:** The script starts by fetching the most
-   recent SemVer release tag of the current branch, by looking at the local data
-   available in your repository.
-1. **Prompting for a new release tag:** The user is then prompted to enter a new
-   release tag. To assist with this, the script displays the tag retrieved in
-   the previous step, and validates the format of the inputted tag (vX.X.X). The
-   user is also reminded to update the version field in package.json.
-1. **Tagging the new release:** The script then tags a new release and syncs the
-   separate major tag (e.g. v1, v2) with the new release tag (e.g. v1.0.0,
-   v2.1.2). When the user is creating a new major release, the script
-   auto-detects this and creates a `releases/v#` branch for the previous major
-   version.
-1. **Pushing changes to remote:** Finally, the script pushes the necessary
-   commits, tags and branches to the remote repository. From here, you will need
-   to create a new release in GitHub so users can easily reference the new tags
-   in their workflows.
+| Output            | Description                           |
+| ----------------- | ------------------------------------- |
+| `ssh-key-path`    | Path to the installed SSH signing key |
+| `public-key`      | The SSH public key content            |
+| `key-fingerprint` | The SSH key fingerprint (SHA256)      |
 
-## Dependency License Management
+## 🔧 Setup Guide
 
-This template includes a GitHub Actions workflow,
-[`licensed.yml`](./.github/workflows/licensed.yml), that uses
-[Licensed](https://github.com/licensee/licensed) to check for dependencies with
-missing or non-compliant licenses. This workflow is initially disabled. To
-enable the workflow, follow the below steps.
+### 1. Create Bot Account (Recommended)
 
-1. Open [`licensed.yml`](./.github/workflows/licensed.yml)
-1. Uncomment the following lines:
+For professional projects, create a dedicated bot account rather than using your personal account:
 
-   ```yaml
-   # pull_request:
-   #   branches:
-   #     - main
-   # push:
-   #   branches:
-   #     - main
+#### Create the Bot Account
+
+1. Sign out of your personal GitHub account
+2. Go to https://github.com/join
+3. Create account with username like `yourproject-bot`
+4. Use a real email address that can receive the invitation (e.g., `yourproject-bot@yourdomain.com`)
+5. Verify the email address
+6. **Enable 2FA** (required by many organizations and strongly recommended):
+   - Go to Settings → Password and authentication
+   - Set up two-factor authentication
+   - Save backup codes securely
+
+#### Add Bot as Repository Collaborator
+
+1. Go to your repository settings
+2. Click **Collaborators** in the left sidebar
+3. Click **Add people**
+4. Search for your bot account username
+5. Select **Write** permission level (needed for pushes and releases)
+6. Send invitation
+
+#### Bot Accepts Invitation
+
+1. Sign in as the bot account
+2. Check notifications or email for repository invitation
+3. Accept the invitation
+
+### 2. Generate SSH Signing Key
+
+Generate an Ed25519 SSH key specifically for commit signing:
+
+```bash
+# Generate the key pair
+ssh-keygen -t ed25519 -f ~/.ssh/yourproject-bot-signing -N "" -C "yourproject-bot"
+
+# Display the public key (you'll need this for GitHub)
+cat ~/.ssh/yourproject-bot-signing.pub
+```
+
+### 3. Add SSH Key to GitHub Bot Account
+
+**Important**: Add the key to the **bot account**, not your personal account.
+
+1. Sign in as your bot account
+2. Go to Settings → SSH and GPG keys
+3. Click **New SSH key**
+4. **Critical**: For "Key type", select **"Signing Key"** (not "Authentication Key")
+5. Title: `Repository Release Signing Key`
+6. Key: Paste the contents of `~/.ssh/yourproject-bot-signing.pub`
+7. Click **Add SSH key**
+
+### 4. Configure Repository Secrets
+
+#### Copy the Private Key
+
+```bash
+# Copy private key to clipboard (macOS)
+cat ~/.ssh/yourproject-bot-signing | pbcopy
+
+# Copy private key to clipboard (Linux with xclip)
+cat ~/.ssh/yourproject-bot-signing | xclip -selection clipboard
+
+# Copy private key to clipboard (Windows with clip)
+cat ~/.ssh/yourproject-bot-signing | clip
+```
+
+#### Add Repository Secrets
+
+1. Go to your repository settings
+2. Navigate to Settings → Secrets and variables → Actions
+3. Add these secrets:
+
+| Secret Name       | Value                         | Example                                  |
+| ----------------- | ----------------------------- | ---------------------------------------- |
+| `SSH_SIGNING_KEY` | Paste the private key content | `-----BEGIN OPENSSH PRIVATE KEY-----`... |
+| `GIT_USER_NAME`   | Bot account username          | `yourproject-bot`                        |
+| `GIT_USER_EMAIL`  | Bot email address             | `bot@yourdomain.com`                     |
+| `NPM_TOKEN`       | Your npm authentication token | (if publishing to npm)                   |
+
+### 5. Secure Your Local Keys
+
+After setting up, securely remove local key copies:
+
+```bash
+# Remove the local key files
+rm ~/.ssh/yourproject-bot-signing
+rm ~/.ssh/yourproject-bot-signing.pub
+
+# Or move to secure backup location
+mv ~/.ssh/yourproject-bot-signing* ~/secure-backup/
+```
+
+### 6. Test Your Setup
+
+Create a test workflow to verify everything works:
+
+```yaml
+name: Test SSH Signing
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required for pushing
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+
+      - uses: photostructure/git-ssh-signing-action@v1
+        with:
+          ssh-signing-key: ${{ secrets.SSH_SIGNING_KEY }}
+          git-user-name: ${{ secrets.GIT_USER_NAME }}
+          git-user-email: ${{ secrets.GIT_USER_EMAIL }}
+
+      - name: Test signed commit and push
+        run: |
+          # Create a test file
+          echo "SSH signing test - $(date)" > test-ssh-signing.txt
+          git add test-ssh-signing.txt
+
+          # Make a signed commit
+          git commit -m "test: SSH signing verification"
+
+          # Show the signature locally
+          git log --show-signature -1
+
+          # Push to verify on GitHub
+          git push origin main
+```
+
+**Important**: After running this test:
+
+1. Check the commit on GitHub - it should show a "Verified" badge
+2. **Delete the test file** to clean up:
+   ```bash
+   git rm test-ssh-signing.txt
+   git commit -m "chore: remove SSH signing test file"
+   git push origin main
+   ```
+3. **Delete the test workflow** to prevent accidental re-runs:
+   ```bash
+   git rm .github/workflows/test-ssh-signing.yml
+   git commit -m "chore: remove SSH signing test workflow"
+   git push origin main
    ```
 
-1. Save and commit the changes
+### 7. Pre-Release Checklist
 
-Once complete, this workflow will run any time a pull request is created or
-changes pushed directly to `main`. If the workflow detects any dependencies with
-missing or non-compliant licenses, it will fail the workflow and provide details
-on the issue(s) found.
+Before triggering a release:
 
-### Updating Licenses
+- [ ] **SSH_SIGNING_KEY** secret is configured in repository
+- [ ] **GIT_USER_NAME** and **GIT_USER_EMAIL** secrets are set
+- [ ] **NPM_TOKEN** is valid with publish permissions (if using npm)
+- [ ] SSH public key is added to bot's GitHub account as **Signing Key**
+- [ ] Bot account has **write access** to the repository
+- [ ] Test workflow passes successfully
+- [ ] You're on the main branch with latest changes
 
-Whenever you install or update dependencies, you can use the Licensed CLI to
-update the licenses database. To install Licensed, see the project's
-[Readme](https://github.com/licensee/licensed?tab=readme-ov-file#installation).
+## 🔐 Security Best Practices
 
-To update the cached licenses, run the following command:
+### SSH Key Management
+
+- **Use Ed25519 keys** for better security and performance
+- **Generate dedicated signing keys** - don't reuse authentication keys
+- **Use bot accounts** for automation rather than personal accounts
+- **Rotate keys periodically** (recommended every 2-3 years)
+- **Never commit private keys** to repositories
+
+### Repository Configuration
+
+- **Store keys in GitHub Secrets** with appropriate access controls
+- **Use environment protection rules** for production deployments
+- **Enable branch protection** for main/release branches
+- **Require signed commits** in branch protection rules
+
+### Bot Account Setup
+
+- **Create dedicated bot accounts** for automation
+- **Use minimal permissions** (only what's needed for releases)
+- **Use repository-specific keys** when possible
+- **Monitor bot account activity** regularly
+
+## 🆚 SSH vs GPG Signing
+
+| Feature                 | SSH Signing            | GPG Signing        |
+| ----------------------- | ---------------------- | ------------------ |
+| **Setup Complexity**    | ✅ Simple              | ❌ Complex         |
+| **Key Generation**      | ✅ One command         | ❌ Multiple steps  |
+| **Passphrase Handling** | ✅ Not required        | ❌ Required in CI  |
+| **Wrapper Scripts**     | ✅ Not needed          | ❌ Often required  |
+| **GitHub Verification** | ✅ Full support        | ✅ Full support    |
+| **Maintenance**         | ✅ Minimal             | ❌ Higher overhead |
+| **Algorithm Support**   | ✅ Ed25519, RSA, ECDSA | ✅ RSA, ECC, EdDSA |
+
+## 🛠️ Troubleshooting
+
+### Commits Show as "Unverified"
+
+- Ensure SSH key is added as **Signing Key** (not Authentication Key)
+- Verify email in Git config matches GitHub account email
+- Confirm bot account owns the SSH key
+- Check that commit signing is enabled (`git config --get commit.gpgsign`)
+
+### "Load key failed" Error
+
+- Verify `SSH_SIGNING_KEY` secret contains complete private key
+- Check for extra newlines or spaces in the secret
+- Ensure private key format is correct (starts with
+  `-----BEGIN OPENSSH PRIVATE KEY-----`)
+
+### Permission Denied on Push
+
+- Confirm bot account has write access to repository
+- Verify repository permissions and branch protection rules
+- Check if 2FA is properly configured for bot account
+
+### Action Fails During Setup
+
+- Enable debug logging: Set `ACTIONS_STEP_DEBUG` secret to `true`
+- Check workflow logs for detailed error messages
+- Verify all required inputs are provided
+- Test SSH key locally before using in CI
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md)
+for details.
+
+### Development Setup
 
 ```bash
-licensed cache
+# Clone the repository
+git clone https://github.com/photostructure/git-ssh-signing-action.git
+cd git-ssh-signing-action
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Build the action
+npm run bundle
+
+# Run all checks
+npm run all
 ```
 
-To check the status of cached licenses, run the following command:
+## 📄 License
 
-```bash
-licensed status
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
+
+## 🙏 Acknowledgments
+
+- Built with the [GitHub Actions Toolkit](https://github.com/actions/toolkit)
+- Based on the official
+  [TypeScript Action Template](https://github.com/actions/typescript-action)
+
+## 📚 Related Links
+
+- [GitHub SSH Commit Verification](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#ssh-commit-signature-verification)
+- [Git SSH Signing Documentation](https://git-scm.com/docs/git-config#Documentation/git-config.txt-gpgformat)
+- [GitHub Actions Encrypted Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
