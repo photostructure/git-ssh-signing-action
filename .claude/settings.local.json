@@ -31,7 +31,10 @@
       "WebFetch(domain:json.schemastore.org)",
       "Bash(chmod:*)",
       "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest __tests__/git-config-scope.test.ts)",
-      "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest __tests__/context-validation.test.ts)"
+      "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest __tests__/context-validation.test.ts)",
+      "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest __tests__/ssh-integration.test.ts)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

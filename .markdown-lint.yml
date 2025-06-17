@@ -4,6 +4,9 @@
 MD004:
   style: dash
 
+# Allow inline HTML (for SVG images with height)
+MD033: false
+
 # Disable line length for tables
 MD013:
   tables: false
