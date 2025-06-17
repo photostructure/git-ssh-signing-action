@@ -2,13 +2,16 @@
 
 <img src="doc/unverified-to-verified.svg" alt="Verified" height="40">
 
-**Get verified commits in GitHub Actions. No GPG hassles. Just works.** ✅
+**Easy verified commits in GitHub Actions with no GPG hassles**
 
-[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Install-blue?logo=github&style=for-the-badge)](https://github.com/marketplace/actions/git-ssh-signing-action)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-install-blue?logo=github&style=for-the-badge)](https://github.com/marketplace/actions/git-ssh-signing-action)
+[![GitHub](https://img.shields.io/badge/GitHub-source-blue?logo=github&style=for-the-badge)](https://github.com/photostructure/git-ssh-signing-action)
 
 ## Why?
 
-Unsigned commits look suspicious. GitHub shows "Verified" badges on signed commits, proving they're authentic. GPG signing in CI is complex. SSH signing is simple. This action makes it trivial.
+Unsigned commits look suspicious. GitHub shows "Verified" badges on signed commits, proving they're authentic. Signing commits with GPG within CI is tricky. Signing commits with SSH is much simpler.
+
+This action makes it trivial.
 
 ## Usage
 
