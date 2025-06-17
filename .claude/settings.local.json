@@ -28,7 +28,10 @@
       "Bash(npm audit:*)",
       "Bash(git remote get-url:*)",
       "Bash(gh run view:*)",
-      "WebFetch(domain:json.schemastore.org)"
+      "WebFetch(domain:json.schemastore.org)",
+      "Bash(chmod:*)",
+      "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest __tests__/git-config-scope.test.ts)",
+      "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest __tests__/context-validation.test.ts)"
     ],
     "deny": []
   }
