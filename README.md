@@ -1,53 +1,31 @@
 # Git SSH Signing Action
 
-**The simplest way to get verified commits from your GitHub Actions workflows.** 🤖✍️
+<img src="doc/unverified-to-verified.svg" alt="Verified" height="40">
 
-[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Git%20SSH%20Signing%20Action-blue?logo=github)](https://github.com/marketplace/actions/git-ssh-signing-action)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/ci.yml/badge.svg)](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/ci.yml)
-[![Check dist/](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/check-dist.yml)
-[![CodeQL](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/photostructure/git-ssh-signing-action/actions/workflows/codeql-analysis.yml)
+**Get verified commits in GitHub Actions. No GPG hassle. Just works.** ✅
 
-A GitHub Action that handles SSH (instead of GPG) signing key setup, enabling your automated workflows to create verified commits and tags that appear with GitHub's green checkmark.
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Install-blue?logo=github&style=for-the-badge)](https://github.com/marketplace/actions/git-ssh-signing-action)
 
-## 🎯 Why Use This?
+## Why?
 
-Transform your automated commits from unverified to verified:
+Unsigned commits look suspicious. GitHub shows "Verified" badges on signed commits, proving they're authentic. GPG signing in CI is complex. SSH signing is simple. This action makes it trivial.
 
-<p align="center">
-  <img src="doc/unverified-to-verified.svg" alt="Verified" height="32">
-</p>
-
-Verified commits provide:
-- **Trust** - Cryptographic proof that commits come from your automation
-- **Security** - Protection against commit tampering and impersonation
-- **Compliance** - Ability to enforce signed commits on protected branches
-
-[Learn more about commit signature verification →](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
-
-## ✨ Features
-
-- **🔐 Secure Key Management**: Installs SSH keys with proper permissions (0600)
-- **🎯 Complete Git Setup**: Configures user identity and SSH signing format
-- **🧹 Automatic Cleanup**: Removes keys and restores Git config after workflow
-- **🛡️ GitHub Integration**: Works with branch protection and verified commits
-- **📦 Zero Dependencies**: Uses only standard Git and OpenSSH tools
-
-## 📋 Requirements
-
-- **Platform**: Linux or macOS runners only (`ubuntu-latest`, `macos-latest`)
-- **Git**: Version 2.34.0 or later (for SSH signing support)
-- **OpenSSH**: Standard installation with `ssh-keygen` and `ssh-agent`
-
-> **⚠️ Windows Not Supported**: This action requires POSIX file permissions and SSH agent functionality that are not available on Windows runners. Use `ubuntu-latest` or `macos-latest` for your workflows.
-
-## 🚀 Quick Start
-
-### Basic Usage
+## Usage
 
 ```yaml
-name: Release with SSH Signing
+- uses: photostructure/git-ssh-signing-action@v1
+  with:
+    ssh-signing-key: ${{ secrets.SSH_SIGNING_KEY }}
+    git-user-name: ${{ secrets.GIT_USER_NAME }}
+    git-user-email: ${{ secrets.GIT_USER_EMAIL }}
+```
 
+That's it. Your commits are now signed and verified.
+
+## Complete Example
+
+```yaml
+name: Release
 on:
   push:
     tags: ["v*"]
@@ -59,329 +37,104 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # Setup SSH signing
       - uses: photostructure/git-ssh-signing-action@v1
         with:
           ssh-signing-key: ${{ secrets.SSH_SIGNING_KEY }}
-          git-user-name: ${{ secrets.GIT_USER_NAME }}
-          git-user-email: ${{ secrets.GIT_USER_EMAIL }}
+          git-user-name: "Release Bot"
+          git-user-email: "bot@example.com"
 
-      # Your build and release steps here
-      - run: npm ci
       - run: npm version patch
-      - run: git push origin main --follow-tags
-
-      # Cleanup runs automatically - no need for explicit cleanup step!
+      - run: git push --follow-tags
 ```
 
-### Advanced Usage with Custom Key Path
+## Setup (5 Minutes)
 
-```yaml
-- uses: photostructure/git-ssh-signing-action@v1
-  with:
-    ssh-signing-key: ${{ secrets.SSH_SIGNING_KEY }}
-    git-user-name: "Release Bot"
-    git-user-email: "bot@example.com"
-    ssh-key-path: "/tmp/my-signing-key"
-# No cleanup step needed - it runs automatically!
-```
-
-## 📋 Inputs
-
-| Input                    | Description                                            | Required | Default              |
-| ------------------------ | ------------------------------------------------------ | -------- | -------------------- |
-| `ssh-signing-key`        | SSH private key for signing commits and tags           | ✅ Yes   | -                    |
-| `git-user-name`          | Git user.name for commits                              | ✅ Yes   | -                    |
-| `git-user-email`         | Git user.email for commits                             | ✅ Yes   | -                    |
-| `ssh-key-path`           | Custom path for SSH signing key                        | ❌ No    | `~/.ssh/signing_key` |
-| `git-commit-gpgsign`     | Sign all commits                                       | ❌ No    | `true`               |
-| `git-tag-gpgsign`        | Sign all tags                                          | ❌ No    | `true`               |
-| `git-push-gpgsign`       | Sign pushes (`if-asked`, `true`, or `false`)           | ❌ No    | `if-asked`           |
-| `create-allowed-signers` | Create allowed signers file for signature verification | ❌ No    | `true`               |
-
-## 📤 Outputs
-
-| Output            | Description                           |
-| ----------------- | ------------------------------------- |
-| `ssh-key-path`    | Path to the installed SSH signing key |
-| `public-key`      | The SSH public key content            |
-| `key-fingerprint` | The SSH key fingerprint (SHA256)      |
-
-## 🔧 Setup Guide
-
-### 1. Create Bot Account (Recommended)
-
-For professional projects, create a dedicated bot account rather than using your personal account:
-
-#### Create the Bot Account
-
-1. Sign out of your personal GitHub account
-2. Go to https://github.com/join
-3. Create account with username like `yourproject-bot`
-4. Use a real email address that can receive the invitation (e.g., `yourproject-bot@yourdomain.com`)
-5. Verify the email address
-6. **Enable 2FA** (required by many organizations and strongly recommended):
-   - Go to Settings → Password and authentication
-   - Set up two-factor authentication
-   - Save backup codes securely
-
-#### Add Bot as Repository Collaborator
-
-1. Go to your repository settings
-2. Click **Collaborators** in the left sidebar
-3. Click **Add people**
-4. Search for your bot account username
-5. Select **Write** permission level (needed for pushes and releases)
-6. Send invitation
-
-#### Bot Accepts Invitation
-
-1. Sign in as the bot account
-2. Check notifications or email for repository invitation
-3. Accept the invitation
-
-### 2. Generate SSH Signing Key
-
-Generate an Ed25519 SSH key specifically for commit signing:
+### 1. Generate SSH Key
 
 ```bash
-# Generate the key pair
-ssh-keygen -t ed25519 -f ~/.ssh/yourproject-bot-signing -N "" -C "yourproject-bot"
+# Generate Ed25519 key (recommended)
+ssh-keygen -t ed25519 -f ~/.ssh/signing-key -N "" -C "yourproject-bot"
 
-# Display the public key (you'll need this for GitHub)
-cat ~/.ssh/yourproject-bot-signing.pub
+# Copy public key for next step
+cat ~/.ssh/signing-key.pub
 ```
 
-### 3. Add SSH Key to GitHub Bot Account
+### 2. Add to GitHub
 
-**Important**: Add the key to the **bot account**, not your personal account.
+1. Go to **Settings → SSH and GPG keys**
+2. Click **New SSH key**
+3. Select **"Signing Key"** (⚠️ NOT "Authentication Key")
+4. Paste the public key
 
-1. Sign in as your bot account
-2. Go to Settings → SSH and GPG keys
-3. Click **New SSH key**
-4. **Critical**: For "Key type", select **"Signing Key"** (not "Authentication Key")
-5. Title: `Repository Release Signing Key`
-6. Key: Paste the contents of `~/.ssh/yourproject-bot-signing.pub`
-7. Click **Add SSH key**
-
-### 4. Configure Repository Secrets
-
-#### Copy the Private Key
+### 3. Create Repository Secrets
 
 ```bash
 # Copy private key to clipboard (macOS)
-cat ~/.ssh/yourproject-bot-signing | pbcopy
+cat ~/.ssh/signing-key | pbcopy
 
-# Copy private key to clipboard (Linux with xclip)
-cat ~/.ssh/yourproject-bot-signing | xclip -selection clipboard
-
-# Copy private key to clipboard (Windows with clip)
-cat ~/.ssh/yourproject-bot-signing | clip
+# Copy private key to clipboard (Linux)
+cat ~/.ssh/signing-key | xclip -selection clipboard
 ```
 
-#### Add Repository Secrets
+Repository → Settings → Secrets → Actions:
 
-1. Go to your repository settings
-2. Navigate to Settings → Secrets and variables → Actions
-3. Add these secrets:
+- `SSH_SIGNING_KEY` = private key (paste from clipboard)
+- `GIT_USER_NAME` = bot username
+- `GIT_USER_EMAIL` = bot email (must match key)
 
-| Secret Name       | Value                         | Example                                  |
-| ----------------- | ----------------------------- | ---------------------------------------- |
-| `SSH_SIGNING_KEY` | Paste the private key content | `-----BEGIN OPENSSH PRIVATE KEY-----`... |
-| `GIT_USER_NAME`   | Bot account username          | `yourproject-bot`                        |
-| `GIT_USER_EMAIL`  | Bot email address             | `bot@yourdomain.com`                     |
-| `NPM_TOKEN`       | Your npm authentication token | (if publishing to npm)                   |
-
-### 5. Secure Your Local Keys
-
-After setting up, securely remove local key copies:
+### 4. Clean Up Local Keys
 
 ```bash
-# Remove the local key files
-rm ~/.ssh/yourproject-bot-signing
-rm ~/.ssh/yourproject-bot-signing.pub
-
-# Or move to secure backup location
-mv ~/.ssh/yourproject-bot-signing* ~/secure-backup/
+rm ~/.ssh/signing-key ~/.ssh/signing-key.pub
 ```
 
-### 6. Test Your Setup
+Done! Your commits will now be verified.
 
-Create a test workflow to verify everything works:
+## Pro Tips
 
-```yaml
-name: Test SSH Signing
+**Use a bot account** for production:
 
-on:
-  workflow_dispatch:
+1. **Create Bot Account**
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # Required for pushing
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ github.token }}
+   - Sign up at github.com/join as `yourproject-bot`
+   - Use a real email (needed for collaborator invite)
+   - Enable 2FA (required by many orgs)
 
-      - uses: photostructure/git-ssh-signing-action@v1
-        with:
-          ssh-signing-key: ${{ secrets.SSH_SIGNING_KEY }}
-          git-user-name: ${{ secrets.GIT_USER_NAME }}
-          git-user-email: ${{ secrets.GIT_USER_EMAIL }}
+2. **Add the bot as a Collaborator**
 
-      - name: Test signed commit and push
-        run: |
-          # Create a test file
-          echo "SSH signing test - $(date)" > test-ssh-signing.txt
-          git add test-ssh-signing.txt
+   - Repository Settings → Collaborators → Add people
+   - Grant write access (needed for pushes)
+   - Bot must accept invite via email
 
-          # Make a signed commit
-          git commit -m "test: SSH signing verification"
+3. **Generate Bot's Key**
 
-          # Show the signature locally
-          git log --show-signature -1
-
-          # Push to verify on GitHub
-          git push origin main
-```
-
-**Important**: After running this test:
-
-1. Check the commit on GitHub - it should show a "Verified" badge
-2. **Delete the test file** to clean up:
    ```bash
-   git rm test-ssh-signing.txt
-   git commit -m "chore: remove SSH signing test file"
-   git push origin main
-   ```
-3. **Delete the test workflow** to prevent accidental re-runs:
-   ```bash
-   git rm .github/workflows/test-ssh-signing.yml
-   git commit -m "chore: remove SSH signing test workflow"
-   git push origin main
+   ssh-keygen -t ed25519 -f ~/.ssh/bot-signing -N "" -C "yourproject-bot"
    ```
 
-### 7. Pre-Release Checklist
+   Use this key in your secrets instead
 
-Before triggering a release:
+**Why?** Isolation, audit trail, least privilege.
 
-- [ ] **SSH_SIGNING_KEY** secret is configured in repository
-- [ ] **GIT_USER_NAME** and **GIT_USER_EMAIL** secrets are set
-- [ ] **NPM_TOKEN** is valid with publish permissions (if using npm)
-- [ ] SSH public key is added to bot's GitHub account as **Signing Key**
-- [ ] Bot account has **write access** to the repository
-- [ ] Test workflow passes successfully
-- [ ] You're on the main branch with latest changes
+## Troubleshooting
 
-## 🔐 Security Best Practices
+| Problem                   | Solution                                          |
+| ------------------------- | ------------------------------------------------- |
+| Commits show "Unverified" | Add key as "Signing Key" not "Authentication Key" |
+| Permission denied         | Give bot write access to repository               |
+| Key load failed           | Check secret has complete private key             |
 
-### SSH Key Management
+## Requirements
 
-- **Use Ed25519 keys** for better security and performance
-- **Generate dedicated signing keys** - don't reuse authentication keys
-- **Use bot accounts** for automation rather than personal accounts
-- **Rotate keys periodically** (recommended every 2-3 years)
-- **Never commit private keys** to repositories
+- **Runners**: `ubuntu-latest` or `macos-latest` (Windows runners not supported)
+- **Git**: 2.34+ (for SSH signing)
+- **Note**: Your dev machine can be Windows, but the workflow must run on Linux/macOS
 
-### Repository Configuration
+## License
 
-- **Store keys in GitHub Secrets** with appropriate access controls
-- **Use environment protection rules** for production deployments
-- **Enable branch protection** for main/release branches
-- **Require signed commits** in branch protection rules
+MIT © [PhotoStructure](https://photostructure.com/)
 
-### Bot Account Setup
+---
 
-- **Create dedicated bot accounts** for automation
-- **Use minimal permissions** (only what's needed for releases)
-- **Use repository-specific keys** when possible
-- **Monitor bot account activity** regularly
-
-## 🆚 SSH vs GPG Signing
-
-| Feature                 | SSH Signing            | GPG Signing        |
-| ----------------------- | ---------------------- | ------------------ |
-| **Setup Complexity**    | ✅ Simple              | ❌ Complex         |
-| **Key Generation**      | ✅ One command         | ❌ Multiple steps  |
-| **Passphrase Handling** | ✅ Not required        | ❌ Required in CI  |
-| **Wrapper Scripts**     | ✅ Not needed          | ❌ Often required  |
-| **GitHub Verification** | ✅ Full support        | ✅ Full support    |
-| **Maintenance**         | ✅ Minimal             | ❌ Higher overhead |
-| **Algorithm Support**   | ✅ Ed25519, RSA, ECDSA | ✅ RSA, ECC, EdDSA |
-
-## 🛠️ Troubleshooting
-
-### Commits Show as "Unverified"
-
-- Ensure SSH key is added as **Signing Key** (not Authentication Key)
-- Verify email in Git config matches GitHub account email
-- Confirm bot account owns the SSH key
-- Check that commit signing is enabled (`git config --get commit.gpgsign`)
-
-### "Load key failed" Error
-
-- Verify `SSH_SIGNING_KEY` secret contains complete private key
-- Check for extra newlines or spaces in the secret
-- Ensure private key format is correct (starts with
-  `-----BEGIN OPENSSH PRIVATE KEY-----`)
-
-### Permission Denied on Push
-
-- Confirm bot account has write access to repository
-- Verify repository permissions and branch protection rules
-- Check if 2FA is properly configured for bot account
-
-### Action Fails During Setup
-
-- Enable debug logging: Set `ACTIONS_STEP_DEBUG` secret to `true`
-- Check workflow logs for detailed error messages
-- Verify all required inputs are provided
-- Test SSH key locally before using in CI
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md)
-for details.
-
-### Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/photostructure/git-ssh-signing-action.git
-cd git-ssh-signing-action
-
-# Install dependencies
-npm install
-
-# Run tests
-npm test
-
-# Build the action
-npm run bundle
-
-# Run all checks
-npm run all
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
-for details.
-
-## 🙏 Acknowledgments
-
-- Built with the [GitHub Actions Toolkit](https://github.com/actions/toolkit)
-- Based on the official
-  [TypeScript Action Template](https://github.com/actions/typescript-action)
-
-## 📚 Related Links
-
-- [GitHub SSH Commit Verification](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification#ssh-commit-signature-verification)
-- [Git SSH Signing Documentation](https://git-scm.com/docs/git-config#Documentation/git-config.txt-gpgformat)
-- [GitHub Actions Encrypted Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
-- [GitHub SSH key setup](https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key#telling-git-about-your-ssh-key)
+[Documentation](doc/SETUP.md) • [Issues](https://github.com/photostructure/git-ssh-signing-action/issues) • [Contributing](CONTRIBUTING.md)
