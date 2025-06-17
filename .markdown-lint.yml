@@ -25,3 +25,6 @@ MD030:
 # Code block style
 MD046:
   style: fenced
+
+# Allow duplicate headings (useful for changelog sections)
+MD024: false

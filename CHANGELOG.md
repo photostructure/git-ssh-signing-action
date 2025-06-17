@@ -5,7 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] (16 June 2025)
+## [0.2.0] - 2025-01-17
+
+### Added
+
+- Configurable Git config scope with local as default (#f88be7e)
+
+### Changed
+
+- Improved documentation and clarified machine user setup (#93912a1, #9369bd0)
+- Streamlined README for clarity and conciseness (#9369bd0)
+- Enhanced test suite by consolidating to favor integration tests over heavy mocking (#f3e2e71)
+
+[0.2.0]: https://github.com/photostructure/git-ssh-signing-action/compare/v0.1.0...v0.2.0
+
+## [0.1.0] - 2025-01-16
 
 ### Added
 
@@ -29,4 +43,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic cleanup of credentials after use
 - Integration with GitHub security features (Dependabot, CodeQL)
 
-https://github.com/photostructure/git-ssh-signing-action/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/photostructure/git-ssh-signing-action/releases/tag/v0.1.0
