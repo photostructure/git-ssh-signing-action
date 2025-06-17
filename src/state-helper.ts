@@ -11,6 +11,7 @@ export const StateKeys = strEnum(
   "gitTagGpgSign",
   "gitPushGpgSign",
   "gitAllowedSignersFile",
+  "gitConfigScope",
 );
 export type StateKey = StrEnumKeys<typeof StateKeys>;
 

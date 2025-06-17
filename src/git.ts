@@ -33,13 +33,21 @@ export async function execGit(args: string[]): Promise<GitCommandResult> {
 /**
  * Set a git configuration value
  */
-export async function setConfig(
-  key: string,
-  value: string,
-  global = true,
-): Promise<void> {
+export async function setConfig({
+  key,
+  value,
+  scope = "local",
+}: {
+  key: string;
+  value: string;
+  scope?: "local" | "global";
+}): Promise<void> {
   const args = ["config"];
-  if (global) args.push("--global");
+  if (scope === "global") {
+    args.push("--global");
+  } else {
+    args.push("--local");
+  }
   args.push(key, value);
 
   const result = await execGit(args);
@@ -51,12 +59,19 @@ export async function setConfig(
 /**
  * Get a git configuration value
  */
-export async function getConfig(
-  key: string,
-  global = true,
-): Promise<string | undefined> {
+export async function getConfig({
+  key,
+  scope = "local",
+}: {
+  key: string;
+  scope?: "local" | "global";
+}): Promise<string | undefined> {
   const args = ["config"];
-  if (global) args.push("--global");
+  if (scope === "global") {
+    args.push("--global");
+  } else {
+    args.push("--local");
+  }
   args.push("--get", key);
 
   const result = await execGit(args);
@@ -69,13 +84,20 @@ export async function getConfig(
 /**
  * Unset a git configuration value
  */
-export async function unsetConfig(
-  key: string,
-  global = true,
-): Promise<boolean> {
+export async function unsetConfig({
+  key,
+  scope = "local",
+}: {
+  key: string;
+  scope?: "local" | "global";
+}): Promise<boolean> {
   const args = ["config"];
-  if (global) args.push("--global");
-  args.push("--unset", key);
+  if (scope === "global") {
+    args.push("--global");
+  } else {
+    args.push("--local");
+  }
+  args.push("--unset-all", key);
 
   const result = await execGit(args);
   return result.exitCode === 0;
@@ -84,21 +106,30 @@ export async function unsetConfig(
 /**
  * Check if a git configuration exists
  */
-export async function configExists(
-  key: string,
-  global = true,
-): Promise<boolean> {
-  const value = await getConfig(key, global);
+export async function configExists({
+  key,
+  scope = "local",
+}: {
+  key: string;
+  scope?: "local" | "global";
+}): Promise<boolean> {
+  const value = await getConfig({ key, scope });
   return value !== undefined;
 }
 
 /**
  * Display current git configuration for debugging
  */
-export async function displayConfig(keys: string[]): Promise<void> {
+export async function displayConfig({
+  keys,
+  scope = "local",
+}: {
+  keys: string[];
+  scope?: "local" | "global";
+}): Promise<void> {
   core.startGroup("Git signing configuration");
   for (const key of keys) {
-    const value = await getConfig(key);
+    const value = await getConfig({ key, scope });
     if (value !== undefined) {
       // Mask paths for security
       const displayValue =

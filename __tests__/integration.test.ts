@@ -33,13 +33,23 @@ const coreModule = await import("@actions/core");
 describe("Integration Tests", () => {
   let tempDir: string;
   let sshKeyPath: string;
+  let originalCwd: string;
   const originalGitConfig: Record<string, string | undefined> = {};
+
+  // Override process.env to ensure git uses local config only
+  const originalHome = process.env.HOME;
+  const originalGitConfigNosystem = process.env.GIT_CONFIG_NOSYSTEM;
 
   // Helper to get git config value
   async function getGitConfig(key: string): Promise<string | undefined> {
+    // Safety check - ensure we're in the temp directory
+    if (!process.cwd().includes("ssh-action-test-")) {
+      throw new Error("Test is not running in temp directory!");
+    }
+
     try {
       let output = "";
-      await exec.exec("git", ["config", "--global", "--get", key], {
+      await exec.exec("git", ["config", "--local", "--get", key], {
         silent: true,
         ignoreReturnCode: true,
         listeners: {
@@ -61,28 +71,33 @@ describe("Integration Tests", () => {
     }
   }
 
-  // Helper to restore git config
-  async function restoreGitConfig(): Promise<void> {
-    for (const [key, value] of Object.entries(originalGitConfig)) {
-      if (value === undefined) {
-        // Unset if it wasn't set before
-        await exec.exec("git", ["config", "--global", "--unset", key], {
-          ignoreReturnCode: true,
-          silent: true,
-        });
-      } else {
-        // Restore original value
-        await exec.exec("git", ["config", "--global", key, value], {
-          silent: true,
-        });
-      }
-    }
-  }
-
   beforeEach(async () => {
     jest.clearAllMocks();
 
-    // Save current git config
+    // Save original directory FIRST
+    originalCwd = process.cwd();
+
+    // Create temporary directory for tests
+    tempDir = await fs.mkdtemp(path.join(tmpdir(), "ssh-action-test-"));
+    sshKeyPath = path.join(tempDir, "test_key");
+
+    // Set environment to prevent git from using global config
+    process.env.HOME = tempDir;
+    process.env.GIT_CONFIG_NOSYSTEM = "1";
+
+    // Change to temp directory and initialize git repository
+    process.chdir(tempDir);
+    await exec.exec("git", ["init"], { silent: true });
+
+    // Set a dummy git identity to avoid polluting global config
+    await exec.exec("git", ["config", "user.name", "Test User"], {
+      silent: true,
+    });
+    await exec.exec("git", ["config", "user.email", "test@example.com"], {
+      silent: true,
+    });
+
+    // Save current git config IN THE TEMP REPO
     await saveGitConfig([
       "user.name",
       "user.email",
@@ -93,10 +108,6 @@ describe("Integration Tests", () => {
       "push.gpgsign",
       "gpg.ssh.allowedSignersFile",
     ]);
-
-    // Create temporary directory for tests
-    tempDir = await fs.mkdtemp(path.join(tmpdir(), "ssh-action-test-"));
-    sshKeyPath = path.join(tempDir, "test_key");
 
     // Set up default mocks
     (coreModule.getInput as jest.Mock<unknown[], string>).mockImplementation(
@@ -148,16 +159,36 @@ describe("Integration Tests", () => {
   });
 
   afterEach(async () => {
+    // Always restore the original directory first
+    try {
+      process.chdir(originalCwd);
+    } catch (error) {
+      console.error("Failed to restore directory:", error);
+    }
+
+    // Restore environment variables
+    if (originalHome !== undefined) {
+      process.env.HOME = originalHome;
+    } else {
+      delete process.env.HOME;
+    }
+
+    if (originalGitConfigNosystem !== undefined) {
+      process.env.GIT_CONFIG_NOSYSTEM = originalGitConfigNosystem;
+    } else {
+      delete process.env.GIT_CONFIG_NOSYSTEM;
+    }
+
+    // Clean up mocks
     jest.restoreAllMocks();
 
-    // Restore git config
-    await restoreGitConfig();
-
-    // Clean up temp directory
-    try {
-      await fs.rm(tempDir, { recursive: true, force: true });
-    } catch {
-      // Ignore cleanup errors
+    // Clean up temp directory if it exists
+    if (tempDir) {
+      try {
+        await fs.rm(tempDir, { recursive: true, force: true });
+      } catch (error) {
+        console.error("Failed to clean up temp directory:", error);
+      }
     }
   });
 
@@ -199,6 +230,7 @@ describe("Integration Tests", () => {
         (name: string) => {
           if (name === "isPost") return "true";
           if (name === "sshKeyPath") return sshKeyPath;
+          if (name === "gitConfigScope") return "local";
           return "";
         },
       );

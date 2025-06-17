@@ -37,6 +37,10 @@ inputs:
     description: Create allowed signers file for signature verification
     required: false
     default: "true"
+  git-config-scope:
+    description: Git config scope (local or global). Local is recommended.
+    required: false
+    default: "local"
 
 # Define your outputs here.
 outputs:

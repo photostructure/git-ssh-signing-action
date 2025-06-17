@@ -14,6 +14,7 @@ export interface Context {
   gitTagGpgSign: boolean;
   gitPushGpgSign: string; // "if-asked" | "true" | "false"
   createAllowedSigners: boolean;
+  gitConfigScope: "local" | "global";
 
   // Computed values
   resolvedKeyPath: string;
@@ -36,11 +37,19 @@ export function getContext(): Context {
   const gitPushGpgSign = core.getInput("git-push-gpgsign") || "if-asked";
   const createAllowedSigners =
     core.getBooleanInput("create-allowed-signers") ?? true;
+  const gitConfigScope = core.getInput("git-config-scope") || "local";
 
   // Validate git-push-gpgsign value
   if (!["if-asked", "true", "false"].includes(gitPushGpgSign)) {
     throw new Error(
       `Invalid git-push-gpgsign value: ${gitPushGpgSign}. Must be "if-asked", "true", or "false"`,
+    );
+  }
+
+  // Validate git-config-scope value
+  if (!["local", "global"].includes(gitConfigScope)) {
+    throw new Error(
+      `Invalid git-config-scope value: ${gitConfigScope}. Must be "local" or "global"`,
     );
   }
 
@@ -76,6 +85,7 @@ export function getContext(): Context {
     gitTagGpgSign,
     gitPushGpgSign,
     createAllowedSigners,
+    gitConfigScope: gitConfigScope as "local" | "global",
     resolvedKeyPath,
     publicKeyPath,
   };

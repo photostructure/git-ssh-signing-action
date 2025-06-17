@@ -68,6 +68,16 @@ async function restoreGitConfiguration(): Promise<void> {
   core.info("Restoring git configuration...");
 
   const originalConfig = state.getOriginalGitConfig();
+  const storedScope = state.getState(state.StateKeys.gitConfigScope);
+  const configScope = storedScope as "local" | "global" | undefined;
+
+  if (!configScope) {
+    core.warning(
+      "Git config scope not found in state, falling back to 'local'. This may indicate the action was not properly initialized.",
+    );
+  }
+
+  const scope = configScope ?? "local";
 
   // Restore or unset each configuration
   const configRestoreMap: Array<[string, string | undefined]> = [
@@ -85,7 +95,7 @@ async function restoreGitConfiguration(): Promise<void> {
     if (originalValue !== undefined) {
       // Restore original value
       try {
-        await git.setConfig(key, originalValue);
+        await git.setConfig({ key, value: originalValue, scope });
         core.debug(`Restored ${key} to original value`);
       } catch (error) {
         core.debug(
@@ -94,7 +104,7 @@ async function restoreGitConfiguration(): Promise<void> {
       }
     } else {
       // Unset if it didn't exist before
-      const unset = await git.unsetConfig(key);
+      const unset = await git.unsetConfig({ key, scope });
       if (unset) {
         core.debug(`Unset ${key} (was not previously set)`);
       }
