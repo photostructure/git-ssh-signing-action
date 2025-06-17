@@ -27265,9 +27265,14 @@ function getContext() {
     const gitTagGpgSign = coreExports.getBooleanInput("git-tag-gpgsign") ?? true;
     const gitPushGpgSign = coreExports.getInput("git-push-gpgsign") || "if-asked";
     const createAllowedSigners = coreExports.getBooleanInput("create-allowed-signers") ?? true;
+    const gitConfigScope = coreExports.getInput("git-config-scope") || "local";
     // Validate git-push-gpgsign value
     if (!["if-asked", "true", "false"].includes(gitPushGpgSign)) {
         throw new Error(`Invalid git-push-gpgsign value: ${gitPushGpgSign}. Must be "if-asked", "true", or "false"`);
+    }
+    // Validate git-config-scope value
+    if (!["local", "global"].includes(gitConfigScope)) {
+        throw new Error(`Invalid git-config-scope value: ${gitConfigScope}. Must be "local" or "global"`);
     }
     // Resolve SSH key path (expand ~)
     const resolvedKeyPath = resolvePath(sshKeyPath);
@@ -27296,6 +27301,7 @@ function getContext() {
         gitTagGpgSign,
         gitPushGpgSign,
         createAllowedSigners,
+        gitConfigScope: gitConfigScope,
         resolvedKeyPath,
         publicKeyPath,
     };
@@ -27333,10 +27339,14 @@ async function execGit(args) {
 /**
  * Set a git configuration value
  */
-async function setConfig(key, value, global = true) {
+async function setConfig({ key, value, scope = "local", }) {
     const args = ["config"];
-    if (global)
+    if (scope === "global") {
         args.push("--global");
+    }
+    else {
+        args.push("--local");
+    }
     args.push(key, value);
     const result = await execGit(args);
     if (result.exitCode !== 0) {
@@ -27346,10 +27356,14 @@ async function setConfig(key, value, global = true) {
 /**
  * Get a git configuration value
  */
-async function getConfig(key, global = true) {
+async function getConfig({ key, scope = "local", }) {
     const args = ["config"];
-    if (global)
+    if (scope === "global") {
         args.push("--global");
+    }
+    else {
+        args.push("--local");
+    }
     args.push("--get", key);
     const result = await execGit(args);
     if (result.exitCode === 0) {
@@ -27360,10 +27374,10 @@ async function getConfig(key, global = true) {
 /**
  * Display current git configuration for debugging
  */
-async function displayConfig(keys) {
+async function displayConfig({ keys, scope = "local", }) {
     coreExports.startGroup("Git signing configuration");
     for (const key of keys) {
-        const value = await getConfig(key);
+        const value = await getConfig({ key, scope });
         if (value !== undefined) {
             // Mask paths for security
             const displayValue = key.includes("key") && value.includes("/")
@@ -27524,7 +27538,7 @@ function strEnum(...o) {
 // export const Directions = strEnum("North", "South", "East", "West");
 // export type Direction = StrEnumKeys<typeof Directions>;
 
-const StateKeys = strEnum("sshKeyPath", "gitUserName", "gitUserEmail", "gitSigningKey", "gitGpgFormat", "gitCommitGpgSign", "gitTagGpgSign", "gitPushGpgSign", "gitAllowedSignersFile");
+const StateKeys = strEnum("sshKeyPath", "gitUserName", "gitUserEmail", "gitSigningKey", "gitGpgFormat", "gitCommitGpgSign", "gitTagGpgSign", "gitPushGpgSign", "gitAllowedSignersFile", "gitConfigScope");
 /**
  * Save state for use in cleanup phase
  */
@@ -27564,9 +27578,16 @@ function saveOriginalGitConfig(config) {
 async function run() {
     try {
         const context = getContext();
+        // Check if we're in a git repository when using local config
+        if (context.gitConfigScope === "local") {
+            const gitCheck = await execGit(["rev-parse", "--git-dir"]);
+            if (gitCheck.exitCode !== 0) {
+                throw new Error("Not in a git repository. When using local git config (default), this action must be placed after actions/checkout. Use git-config-scope: global if you need to run this action before checkout.");
+            }
+        }
         coreExports.startGroup("🔐 Setting up SSH signing");
         // Save current git configuration for restoration
-        await saveOriginalConfiguration();
+        await saveOriginalConfiguration(context);
         // Install SSH key
         const publicKey = await installSSHKey(context);
         // Get key information for logging
@@ -27581,20 +27602,27 @@ async function run() {
         // Create allowed signers file if requested
         if (context.createAllowedSigners) {
             const allowedSignersPath = await createAllowedSignersFile(context.gitUserEmail, publicKey, context.resolvedKeyPath);
-            await setConfig("gpg.ssh.allowedSignersFile", allowedSignersPath);
+            await setConfig({
+                key: "gpg.ssh.allowedSignersFile",
+                value: allowedSignersPath,
+                scope: context.gitConfigScope,
+            });
             coreExports.info("✓ Allowed signers file created");
         }
         // Display final configuration
-        await displayConfig([
-            "user.name",
-            "user.email",
-            "gpg.format",
-            "user.signingkey",
-            "commit.gpgsign",
-            "tag.gpgsign",
-            "push.gpgsign",
-            "gpg.ssh.allowedSignersFile",
-        ]);
+        await displayConfig({
+            keys: [
+                "user.name",
+                "user.email",
+                "gpg.format",
+                "user.signingkey",
+                "commit.gpgsign",
+                "tag.gpgsign",
+                "push.gpgsign",
+                "gpg.ssh.allowedSignersFile",
+            ],
+            scope: context.gitConfigScope,
+        });
         // Set outputs for other workflow steps to use
         coreExports.setOutput("ssh-key-path", context.resolvedKeyPath);
         coreExports.setOutput("public-key", publicKey);
@@ -27606,37 +27634,90 @@ async function run() {
         coreExports.setFailed(`Setup failed: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
-async function saveOriginalConfiguration() {
+async function saveOriginalConfiguration(context) {
     coreExports.debug("Saving original git configuration");
     const config = {
-        userName: await getConfig("user.name"),
-        userEmail: await getConfig("user.email"),
-        userSigningKey: await getConfig("user.signingkey"),
-        gpgFormat: await getConfig("gpg.format"),
-        commitGpgSign: await getConfig("commit.gpgsign"),
-        tagGpgSign: await getConfig("tag.gpgsign"),
-        pushGpgSign: await getConfig("push.gpgsign"),
-        allowedSignersFile: await getConfig("gpg.ssh.allowedSignersFile"),
+        userName: await getConfig({
+            key: "user.name",
+            scope: context.gitConfigScope,
+        }),
+        userEmail: await getConfig({
+            key: "user.email",
+            scope: context.gitConfigScope,
+        }),
+        userSigningKey: await getConfig({
+            key: "user.signingkey",
+            scope: context.gitConfigScope,
+        }),
+        gpgFormat: await getConfig({
+            key: "gpg.format",
+            scope: context.gitConfigScope,
+        }),
+        commitGpgSign: await getConfig({
+            key: "commit.gpgsign",
+            scope: context.gitConfigScope,
+        }),
+        tagGpgSign: await getConfig({
+            key: "tag.gpgsign",
+            scope: context.gitConfigScope,
+        }),
+        pushGpgSign: await getConfig({
+            key: "push.gpgsign",
+            scope: context.gitConfigScope,
+        }),
+        allowedSignersFile: await getConfig({
+            key: "gpg.ssh.allowedSignersFile",
+            scope: context.gitConfigScope,
+        }),
     };
     saveOriginalGitConfig(config);
+    saveState(StateKeys.gitConfigScope, context.gitConfigScope);
 }
 async function configureGit(context) {
     coreExports.info("Configuring Git for SSH signing...");
     // Set user information
-    await setConfig("user.name", context.gitUserName);
-    await setConfig("user.email", context.gitUserEmail);
+    await setConfig({
+        key: "user.name",
+        value: context.gitUserName,
+        scope: context.gitConfigScope,
+    });
+    await setConfig({
+        key: "user.email",
+        value: context.gitUserEmail,
+        scope: context.gitConfigScope,
+    });
     // Configure SSH signing
-    await setConfig("gpg.format", "ssh");
-    await setConfig("user.signingkey", context.publicKeyPath);
+    await setConfig({
+        key: "gpg.format",
+        value: "ssh",
+        scope: context.gitConfigScope,
+    });
+    await setConfig({
+        key: "user.signingkey",
+        value: context.publicKeyPath,
+        scope: context.gitConfigScope,
+    });
     // Configure signing behavior
     if (context.gitCommitGpgSign) {
-        await setConfig("commit.gpgsign", "true");
+        await setConfig({
+            key: "commit.gpgsign",
+            value: "true",
+            scope: context.gitConfigScope,
+        });
     }
     if (context.gitTagGpgSign) {
-        await setConfig("tag.gpgsign", "true");
+        await setConfig({
+            key: "tag.gpgsign",
+            value: "true",
+            scope: context.gitConfigScope,
+        });
     }
     if (context.gitPushGpgSign !== "if-asked") {
-        await setConfig("push.gpgsign", context.gitPushGpgSign);
+        await setConfig({
+            key: "push.gpgsign",
+            value: context.gitPushGpgSign,
+            scope: context.gitConfigScope,
+        });
     }
     // Configure npm if available
     try {

@@ -27273,10 +27273,14 @@ async function execGit(args) {
 /**
  * Set a git configuration value
  */
-async function setConfig(key, value, global = true) {
+async function setConfig({ key, value, scope = "local", }) {
     const args = ["config"];
-    if (global)
+    if (scope === "global") {
         args.push("--global");
+    }
+    else {
+        args.push("--local");
+    }
     args.push(key, value);
     const result = await execGit(args);
     if (result.exitCode !== 0) {
@@ -27286,11 +27290,15 @@ async function setConfig(key, value, global = true) {
 /**
  * Unset a git configuration value
  */
-async function unsetConfig(key, global = true) {
+async function unsetConfig({ key, scope = "local", }) {
     const args = ["config"];
-    if (global)
+    if (scope === "global") {
         args.push("--global");
-    args.push("--unset", key);
+    }
+    else {
+        args.push("--local");
+    }
+    args.push("--unset-all", key);
     const result = await execGit(args);
     return result.exitCode === 0;
 }
@@ -27335,7 +27343,7 @@ function strEnum(...o) {
 // export const Directions = strEnum("North", "South", "East", "West");
 // export type Direction = StrEnumKeys<typeof Directions>;
 
-const StateKeys = strEnum("sshKeyPath", "gitUserName", "gitUserEmail", "gitSigningKey", "gitGpgFormat", "gitCommitGpgSign", "gitTagGpgSign", "gitPushGpgSign", "gitAllowedSignersFile");
+const StateKeys = strEnum("sshKeyPath", "gitUserName", "gitUserEmail", "gitSigningKey", "gitGpgFormat", "gitCommitGpgSign", "gitTagGpgSign", "gitPushGpgSign", "gitAllowedSignersFile", "gitConfigScope");
 /**
  * Get state saved during setup phase
  */
@@ -27428,6 +27436,12 @@ async function safeRemoveFile(filePath) {
 async function restoreGitConfiguration() {
     coreExports.info("Restoring git configuration...");
     const originalConfig = getOriginalGitConfig();
+    const storedScope = getState(StateKeys.gitConfigScope);
+    const configScope = storedScope;
+    if (!configScope) {
+        coreExports.warning("Git config scope not found in state, falling back to 'local'. This may indicate the action was not properly initialized.");
+    }
+    const scope = configScope ?? "local";
     // Restore or unset each configuration
     const configRestoreMap = [
         ["user.name", originalConfig.userName],
@@ -27443,7 +27457,7 @@ async function restoreGitConfiguration() {
         if (originalValue !== undefined) {
             // Restore original value
             try {
-                await setConfig(key, originalValue);
+                await setConfig({ key, value: originalValue, scope });
                 coreExports.debug(`Restored ${key} to original value`);
             }
             catch (error) {
@@ -27452,7 +27466,7 @@ async function restoreGitConfiguration() {
         }
         else {
             // Unset if it didn't exist before
-            const unset = await unsetConfig(key);
+            const unset = await unsetConfig({ key, scope });
             if (unset) {
                 coreExports.debug(`Unset ${key} (was not previously set)`);
             }
