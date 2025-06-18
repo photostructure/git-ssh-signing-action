@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-tags:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./ # dogfooding!
+        with:
+          ssh-signing-key: ${{ secrets.SSH_SIGNING_KEY }}
+          git-user-name: ${{ secrets.GIT_USER_NAME }}
+          git-user-email: ${{ secrets.GIT_USER_EMAIL }}
+
+      - name: Update floating tags
+        run: |
+          # Extract version numbers
+          VERSION=${GITHUB_REF#refs/tags/v}
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f2)
+
+          # Update major version tag (e.g., v0)
+          git tag -fa "v$MAJOR" -m "Update v$MAJOR tag to v$VERSION"
+          git push origin "v$MAJOR" --force
+
+          # Update minor version tag (e.g., v0.2)
+          git tag -fa "v$MAJOR.$MINOR" -m "Update v$MAJOR.$MINOR tag to v$VERSION"
+          git push origin "v$MAJOR.$MINOR" --force

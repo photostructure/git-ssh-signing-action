@@ -28,3 +28,6 @@ MD046:
 
 # Allow duplicate headings (useful for changelog sections)
 MD024: false
+
+# Allow example email addresses
+MD034: false
