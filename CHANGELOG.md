@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-01-18
+
+### Added
+
+- GitHub Actions workflow for automated tag updates on release to support `v0` or `v0.1` "floating" versions (#d36120a) -- and use ourself to sign the tags
+
+- Release documentation with detailed release process instructions
+
+### Changed
+
+- Updated markdown-lint configuration
+
+[0.3.0]: https://github.com/photostructure/git-ssh-signing-action/compare/v0.2.0...v0.3.0
+
 ## [0.2.0] - 2025-01-17
 
 ### Added
