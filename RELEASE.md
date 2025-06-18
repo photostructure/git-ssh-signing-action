@@ -31,7 +31,7 @@ Before creating a release, ensure the following repository secrets are configure
    - Enter the new version tag (e.g., `v0.2.0`)
    - Set the target to `main` branch
    - Fill in the release title (e.g., "v0.2.0")
-   - Add release notes describing changes
+   - Add release notes describing changes from `CHANGELOG.md`
    - Click "Publish release"
 
 3. **Automated tag updates**
