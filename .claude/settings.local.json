@@ -38,7 +38,8 @@
       "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest __tests__/action-integration.test.ts -t \"should configure git for SSH signing\")",
       "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest __tests__/git-config-scope.test.ts -t \"should unset config only in current repo\" --no-coverage)",
       "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest __tests__/git-config-scope.test.ts --no-coverage)",
-      "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest __tests__/integration.test.ts --no-coverage)"
+      "Bash(NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest __tests__/integration.test.ts --no-coverage)",
+      "WebSearch"
     ],
     "deny": []
   }
