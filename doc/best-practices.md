@@ -24,14 +24,12 @@ This guide provides comprehensive best practices for GitHub Actions workflows, w
 ### Key Security Measures
 
 1. **Enable GitHub Security Features**
-
    - Enable Dependabot for dependency updates
    - Use code scanning with CodeQL
    - Enable secret scanning
    - Configure security policies
 
 2. **Monitor and Audit**
-
    - Review audit logs regularly
    - Use CODEOWNERS to monitor workflow changes
    - Track workflow modifications in protected branches
@@ -45,7 +43,6 @@ This guide provides comprehensive best practices for GitHub Actions workflows, w
 ### Best Practices
 
 1. **Never use structured data as a secret**
-
    - Avoid JSON, XML, or similar formats in secrets
    - Use individual secret values instead
 
@@ -62,7 +59,6 @@ This guide provides comprehensive best practices for GitHub Actions workflows, w
    ```
 
 3. **Rotation and Scope**
-
    - Rotate secrets periodically
    - Use credentials with minimal required scope
    - Implement expiration dates where possible
@@ -92,7 +88,6 @@ This guide provides comprehensive best practices for GitHub Actions workflows, w
 ### Recommended Approaches
 
 1. **Use Actions Instead of Inline Scripts**
-
    - Create JavaScript actions for complex logic
    - Validate and sanitize inputs within actions
 
@@ -124,7 +119,6 @@ This guide provides comprehensive best practices for GitHub Actions workflows, w
 ### Verification Process
 
 1. **Audit Source Code**
-
    - Review action's repository
    - Check for recent security issues
    - Verify maintainer reputation
@@ -164,7 +158,6 @@ jobs:
 ### Security Settings
 
 1. **Repository Settings**
-
    - Disable "Allow GitHub Actions to create and approve pull requests"
    - Set default permissions to read-only
    - Configure workflow permissions policy
@@ -233,7 +226,6 @@ gh attestation verify oci://ghcr.io/myorg/myimage:latest --owner myorg
 ### Best Practices for Attestations
 
 1. **What to Sign**
-
    - Released software artifacts
    - Container images for production
    - Software Bill of Materials (SBOM)
@@ -321,7 +313,6 @@ jobs:
    ```
 
 2. **JavaScript Action Structure**
-
    - **Bundling**: Include all dependencies in `dist/` folder
    - **Use @actions/core**: For inputs, outputs, and error handling
    - **Post-action cleanup**: Use `post:` in action.yml for cleanup
@@ -341,7 +332,6 @@ jobs:
    ```
 
 3. **Exit Codes and Error Handling**
-
    - Always use `core.setFailed()` for errors (sets exit code 1)
    - Use `core.warning()` for non-fatal issues
    - Use `core.info()` and `core.debug()` for logging
@@ -392,14 +382,12 @@ jobs:
 ### Pre-Publishing Checklist
 
 1. **Action Metadata**
-
    - Unique, descriptive action name
    - Clear, concise description
    - Author field populated
    - Appropriate branding (icon and color)
 
 2. **Documentation**
-
    - Comprehensive README with:
      - Clear description of what the action does
      - Usage examples for common scenarios
@@ -410,7 +398,6 @@ jobs:
    - CONTRIBUTING.md (recommended)
 
 3. **Code Quality**
-
    - All tests passing
    - Proper error handling with clear messages
    - Security best practices followed

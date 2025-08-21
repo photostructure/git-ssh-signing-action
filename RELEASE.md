@@ -13,7 +13,6 @@ Before creating a release, ensure the following repository secrets are configure
 ## Release Steps
 
 1. **Prepare the release**
-
    1. Update `CHANGELOG.md`. Based on the changes since the last release, decide if we need to increment the patch, minor, or major semantic version number.
 
    2. Ensure all tests pass and dist/ is up-to-date:
@@ -25,7 +24,6 @@ Before creating a release, ensure the following repository secrets are configure
    3. Commit and push changes
 
 2. **Create a GitHub Release**
-
    - Go to https://github.com/photostructure/git-ssh-signing-action/releases/new
    - Click "Choose a tag" → "Create new tag"
    - Enter the new version tag (e.g., `v0.2.0`)
@@ -37,7 +35,6 @@ Before creating a release, ensure the following repository secrets are configure
 3. **Automated tag updates**
 
    When you publish the release, the `.github/workflows/release.yml` workflow automatically:
-
    - Creates/updates floating major version tag (e.g., `v0` for `v0.2.0`)
    - Creates/updates floating minor version tag (e.g., `v0.2` for `v0.2.0`)
    - Signs all tags using the configured SSH key **yay us**

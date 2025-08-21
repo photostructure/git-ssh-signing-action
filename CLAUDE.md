@@ -44,7 +44,6 @@ npm run local-action
 The action operates in two phases:
 
 1. **Setup Phase** (main entry):
-
    - `src/main.ts` → `src/ssh-setup.ts`: Installs SSH keys and configures Git
    - `src/context.ts`: Validates inputs and manages configuration
    - `src/ssh.ts`: Handles SSH key operations (install, permissions, agent)

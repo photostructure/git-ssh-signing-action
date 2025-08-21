@@ -119,13 +119,11 @@ Done! Your commits will now be verified.
 Steps to set up a machine user:
 
 1. **Create Machine User Account**
-
    - Sign up at github.com/join as `yourproject-bot`
    - Use a real email (needed for collaborator invite)
    - Enable 2FA (required by many orgs)
 
 2. **Add Machine User as Collaborator**
-
    - Repository Settings → Collaborators → Add people
    - Grant write access (needed for pushes)
    - Machine user must accept invite via email
