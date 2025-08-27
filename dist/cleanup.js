@@ -27304,6 +27304,13 @@ async function unsetConfig({ key, scope = "local", }) {
 }
 
 /**
+ * Check if running on Windows platform
+ */
+function isWindows() {
+    return process.platform === "win32";
+}
+
+/**
  * Remove SSH key from agent
  */
 async function removeKeyFromAgent(keyPath) {
@@ -27317,7 +27324,10 @@ async function removeKeyFromAgent(keyPath) {
         });
     }
     catch (error) {
-        coreExports.debug(`Failed to remove key from SSH agent: ${error instanceof Error ? error.message : String(error)}`);
+        const platformContext = isWindows()
+            ? " (Windows SSH agent cleanup - this is not critical)"
+            : "";
+        coreExports.debug(`Failed to remove key from SSH agent: ${error instanceof Error ? error.message : String(error)}${platformContext}`);
     }
 }
 

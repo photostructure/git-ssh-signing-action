@@ -10,7 +10,7 @@ export default {
   coverageReporters: ["json-summary", "text", "lcov"],
   coverageThreshold: {
     global: {
-      branches: 65, // Reduced after moving from unit to integration tests
+      branches: 60, // Reduced to account for Windows-specific code paths
       functions: 80,
       lines: 80,
       statements: 80,

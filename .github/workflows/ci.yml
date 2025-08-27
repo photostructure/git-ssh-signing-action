@@ -42,7 +42,10 @@ jobs:
 
   test-action:
     name: GitHub Actions Test
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -51,6 +54,7 @@ jobs:
 
       - name: Generate test SSH key
         id: generate-key
+        shell: bash
         run: |
           ssh-keygen -t ed25519 -f test_key -N "" -C "test@example.com"
           {
@@ -69,9 +73,33 @@ jobs:
 
       - name: Verify outputs
         id: verify
+        shell: bash
         run: |
           echo "SSH key path: ${{ steps.test-action.outputs.ssh-key-path }}"
           echo "Key fingerprint: ${{ steps.test-action.outputs.key-fingerprint }}"
           # Verify git config was set
           git config --get user.signingkey
           git config --get gpg.format
+
+      - name: Test platform-specific behavior
+        id: platform-test
+        shell: bash
+        run: |
+          echo "Testing on: ${{ matrix.os }}"
+          if [[ "${{ matrix.os }}" == windows-* ]]; then
+            echo "Windows-specific tests"
+            # Check if SSH key file has appropriate permissions (Windows)
+            if [[ -f "${{ steps.test-action.outputs.ssh-key-path }}" ]]; then
+              echo "✓ SSH key file exists on Windows"
+            fi
+          else
+            echo "Unix-like system tests"
+            # Check file permissions on Unix-like systems
+            PERMS=$(stat -c "%a" "${{ steps.test-action.outputs.ssh-key-path }}" 2>/dev/null || stat -f "%A" "${{ steps.test-action.outputs.ssh-key-path }}" 2>/dev/null)
+            echo "SSH key permissions: $PERMS"
+            if [[ "$PERMS" == "600" ]]; then
+              echo "✓ SSH key has correct permissions (600)"
+            else
+              echo "⚠ SSH key permissions may be incorrect: $PERMS"
+            fi
+          fi

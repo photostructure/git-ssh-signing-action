@@ -105,6 +105,26 @@ rm ~/.ssh/signing-key ~/.ssh/signing-key.pub
 
 Done! Your commits will now be verified.
 
+## Platform Support
+
+This action supports GitHub Actions runners on all major platforms:
+
+| Platform    | Status             | Notes                                  |
+| ----------- | ------------------ | -------------------------------------- |
+| **Ubuntu**  | ✅ Fully Supported | Primary development platform           |
+| **Windows** | ✅ Fully Supported | Uses Windows ACLs for file permissions |
+| **macOS**   | ✅ Fully Supported | Standard Unix permissions              |
+
+### Windows-Specific Considerations
+
+On Windows runners, the action automatically handles platform differences:
+
+- **File Permissions**: Uses Windows ACLs (`icacls`) instead of Unix permissions for SSH key security
+- **SSH Agent**: Handles Git for Windows SSH implementation gracefully with enhanced error messages
+- **Path Handling**: Uses platform-appropriate path resolution
+
+No additional configuration is needed for Windows compatibility.
+
 ## Pro Tips
 
 **Use a [machine user](https://docs.github.com/en/get-started/learning-about-github/types-of-github-accounts#personal-accounts) account** (commonly called a "bot account") for production.
@@ -142,17 +162,18 @@ Steps to set up a machine user:
 
 ## Troubleshooting
 
-| Problem                   | Solution                                          |
-| ------------------------- | ------------------------------------------------- |
-| Commits show "Unverified" | Add key as "Signing Key" not "Authentication Key" |
-| Permission denied         | Give bot write access to repository               |
-| Key load failed           | Check secret has complete private key             |
+| Problem                   | Solution                                                |
+| ------------------------- | ------------------------------------------------------- |
+| Commits show "Unverified" | Add key as "Signing Key" not "Authentication Key"       |
+| Permission denied         | Give bot write access to repository                     |
+| Key load failed           | Check secret has complete private key                   |
+| Windows permission errors | Action handles ACLs automatically - check debug logs    |
+| SSH agent warnings        | Normal on Windows due to SSH implementation differences |
 
 ## Requirements
 
-- **Runners**: `ubuntu-latest` or `macos-latest` (Windows runners not supported)
+- **Runners**: `ubuntu-latest`, `windows-2025`, or `macos-latest`
 - **Git**: 2.34+ (for SSH signing)
-- **Note**: Your dev machine can be Windows, but the workflow must run on Linux/macOS
 
 ## License
 

@@ -3,6 +3,7 @@ import * as exec from "@actions/exec";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { Context } from "./context.js";
+import { isWindows, setSecurePermissions, unixOnly } from "./platform.js";
 
 export interface SSHKeyInfo {
   fingerprint: string;
@@ -85,7 +86,10 @@ export async function installSSHKey(context: Context): Promise<string> {
 
   // Create SSH directory with secure permissions
   core.debug(`Creating SSH directory: ${sshDir}`);
-  await fs.mkdir(sshDir, { recursive: true, mode: 0o700 });
+  await fs.mkdir(sshDir, { recursive: true, ...unixOnly({ mode: 0o700 }) });
+
+  // Set Windows permissions if needed
+  await setSecurePermissions(sshDir, true);
 
   // Write private key with strict permissions
   core.debug(`Installing SSH signing key at: ${resolvedKeyPath}`);
@@ -95,7 +99,12 @@ export async function installSSHKey(context: Context): Promise<string> {
   const formattedKey = trimmedKey.endsWith("\n")
     ? trimmedKey
     : `${trimmedKey}\n`;
-  await fs.writeFile(resolvedKeyPath, formattedKey, { mode: 0o600 });
+  await fs.writeFile(resolvedKeyPath, formattedKey, {
+    ...unixOnly({ mode: 0o600 }),
+  });
+
+  // Set Windows permissions if needed
+  await setSecurePermissions(resolvedKeyPath, false);
 
   // Verify key is valid before proceeding
   try {
@@ -111,7 +120,9 @@ export async function installSSHKey(context: Context): Promise<string> {
   // Generate and write public key
   core.debug("Generating public key from private key");
   const publicKey = await generatePublicKey(resolvedKeyPath);
-  await fs.writeFile(publicKeyPath, publicKey, { mode: 0o644 });
+  await fs.writeFile(publicKeyPath, publicKey, {
+    ...unixOnly({ mode: 0o644 }),
+  });
 
   return publicKey;
 }
@@ -131,7 +142,7 @@ export async function createAllowedSignersFile(
 
   const allowedSignersContent = `${email} ${publicKey}`;
   await fs.writeFile(allowedSignersPath, allowedSignersContent, {
-    mode: 0o644,
+    ...unixOnly({ mode: 0o644 }),
   });
 
   return allowedSignersPath;
@@ -144,7 +155,10 @@ export async function addKeyToAgent(keyPath: string): Promise<boolean> {
   try {
     // Check if SSH agent is running
     if (!process.env.SSH_AUTH_SOCK) {
-      core.debug("SSH agent not available");
+      const platformNote = isWindows()
+        ? " (Windows SSH agent compatibility varies)"
+        : "";
+      core.debug(`SSH agent not available${platformNote}`);
       return false;
     }
 
@@ -157,12 +171,18 @@ export async function addKeyToAgent(keyPath: string): Promise<boolean> {
       core.info("✓ SSH key added to agent");
       return true;
     } else {
-      core.debug("Failed to add key to SSH agent");
+      const platformHint = isWindows()
+        ? " (Note: Windows has known SSH agent compatibility issues between OpenSSH and Git for Windows)"
+        : "";
+      core.debug(`Failed to add key to SSH agent${platformHint}`);
       return false;
     }
   } catch (error) {
+    const platformContext = isWindows()
+      ? " This is common on Windows due to SSH implementation incompatibilities."
+      : "";
     core.debug(
-      `SSH agent operation failed: ${error instanceof Error ? error.message : String(error)}`,
+      `SSH agent operation failed: ${error instanceof Error ? error.message : String(error)}.${platformContext}`,
     );
     return false;
   }
@@ -182,8 +202,11 @@ export async function removeKeyFromAgent(keyPath: string): Promise<void> {
       silent: true,
     });
   } catch (error) {
+    const platformContext = isWindows()
+      ? " (Windows SSH agent cleanup - this is not critical)"
+      : "";
     core.debug(
-      `Failed to remove key from SSH agent: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to remove key from SSH agent: ${error instanceof Error ? error.message : String(error)}${platformContext}`,
     );
   }
 }

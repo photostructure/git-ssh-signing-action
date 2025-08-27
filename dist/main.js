@@ -27390,6 +27390,67 @@ async function displayConfig({ keys, scope = "local", }) {
 }
 
 /**
+ * Check if running on Windows platform
+ */
+function isWindows() {
+    return process.platform === "win32";
+}
+/**
+ * Conditionally apply options only on Unix-like systems
+ * On Windows, returns empty object to avoid unsupported fs options
+ */
+function unixOnly(options) {
+    return isWindows() ? {} : options;
+}
+/**
+ * Set secure file permissions using platform-appropriate methods
+ */
+async function setSecurePermissions(filePath, isDirectory = false) {
+    if (isWindows()) {
+        await setWindowsPermissions(filePath, isDirectory);
+    }
+    else {
+        // Unix permissions are handled via fs.writeFile/mkdir mode parameter
+        // This function is primarily for post-creation permission fixes on Windows
+        coreExports.debug(`Unix permissions handled via fs options for ${isDirectory ? "directory" : "file"}: ${filePath}`);
+    }
+}
+/**
+ * Set Windows file permissions using icacls to restrict access to current user only
+ * Equivalent to chmod 600 (files) or 700 (directories) on Unix
+ */
+async function setWindowsPermissions(filePath, isDirectory) {
+    try {
+        coreExports.debug(`Setting Windows permissions for ${isDirectory ? "directory" : "file"}: ${filePath}`);
+        // Remove inheritance and all existing permissions
+        const inheritanceResult = await execExports.exec("icacls", [filePath, "/inheritance:r"], {
+            ignoreReturnCode: true,
+            silent: true,
+        });
+        if (inheritanceResult !== 0) {
+            coreExports.warning(`Failed to remove inheritance for ${filePath}`);
+            return;
+        }
+        // Grant appropriate permissions to current user only
+        // For directories: Full control (equivalent to 700)
+        // For files: Read/Write (equivalent to 600)
+        const permission = isDirectory ? "(F)" : "(R,W)";
+        const permissionResult = await execExports.exec("icacls", [filePath, "/grant:r", `%USERNAME%:${permission}`], {
+            ignoreReturnCode: true,
+            silent: true,
+        });
+        if (permissionResult !== 0) {
+            coreExports.warning(`Failed to set permissions for ${filePath}`);
+            return;
+        }
+        coreExports.debug(`✓ Windows permissions set for ${filePath} (${permission})`);
+    }
+    catch (error) {
+        coreExports.warning(`Windows permission setting failed for ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+}
+
+/**
  * Parse SSH key information output from ssh-keygen
  */
 function parseSSHKeyInfoOutput(output) {
@@ -27451,7 +27512,9 @@ async function installSSHKey(context) {
     const sshDir = path.dirname(resolvedKeyPath);
     // Create SSH directory with secure permissions
     coreExports.debug(`Creating SSH directory: ${sshDir}`);
-    await fs.mkdir(sshDir, { recursive: true, mode: 0o700 });
+    await fs.mkdir(sshDir, { recursive: true, ...unixOnly({ mode: 0o700 }) });
+    // Set Windows permissions if needed
+    await setSecurePermissions(sshDir, true);
     // Write private key with strict permissions
     coreExports.debug(`Installing SSH signing key at: ${resolvedKeyPath}`);
     // Trim whitespace and ensure proper formatting
@@ -27460,7 +27523,11 @@ async function installSSHKey(context) {
     const formattedKey = trimmedKey.endsWith("\n")
         ? trimmedKey
         : `${trimmedKey}\n`;
-    await fs.writeFile(resolvedKeyPath, formattedKey, { mode: 0o600 });
+    await fs.writeFile(resolvedKeyPath, formattedKey, {
+        ...unixOnly({ mode: 0o600 }),
+    });
+    // Set Windows permissions if needed
+    await setSecurePermissions(resolvedKeyPath, false);
     // Verify key is valid before proceeding
     try {
         await getSSHKeyInfo(resolvedKeyPath);
@@ -27473,7 +27540,9 @@ async function installSSHKey(context) {
     // Generate and write public key
     coreExports.debug("Generating public key from private key");
     const publicKey = await generatePublicKey(resolvedKeyPath);
-    await fs.writeFile(publicKeyPath, publicKey, { mode: 0o644 });
+    await fs.writeFile(publicKeyPath, publicKey, {
+        ...unixOnly({ mode: 0o644 }),
+    });
     return publicKey;
 }
 /**
@@ -27483,7 +27552,7 @@ async function createAllowedSignersFile(email, publicKey, keyPath) {
     const allowedSignersPath = path.join(path.dirname(keyPath), "allowed_signers");
     const allowedSignersContent = `${email} ${publicKey}`;
     await fs.writeFile(allowedSignersPath, allowedSignersContent, {
-        mode: 0o644,
+        ...unixOnly({ mode: 0o644 }),
     });
     return allowedSignersPath;
 }
@@ -27494,7 +27563,10 @@ async function addKeyToAgent(keyPath) {
     try {
         // Check if SSH agent is running
         if (!process.env.SSH_AUTH_SOCK) {
-            coreExports.debug("SSH agent not available");
+            const platformNote = isWindows()
+                ? " (Windows SSH agent compatibility varies)"
+                : "";
+            coreExports.debug(`SSH agent not available${platformNote}`);
             return false;
         }
         const result = await execExports.exec("ssh-add", [keyPath], {
@@ -27506,12 +27578,18 @@ async function addKeyToAgent(keyPath) {
             return true;
         }
         else {
-            coreExports.debug("Failed to add key to SSH agent");
+            const platformHint = isWindows()
+                ? " (Note: Windows has known SSH agent compatibility issues between OpenSSH and Git for Windows)"
+                : "";
+            coreExports.debug(`Failed to add key to SSH agent${platformHint}`);
             return false;
         }
     }
     catch (error) {
-        coreExports.debug(`SSH agent operation failed: ${error instanceof Error ? error.message : String(error)}`);
+        const platformContext = isWindows()
+            ? " This is common on Windows due to SSH implementation incompatibilities."
+            : "";
+        coreExports.debug(`SSH agent operation failed: ${error instanceof Error ? error.message : String(error)}.${platformContext}`);
         return false;
     }
 }
