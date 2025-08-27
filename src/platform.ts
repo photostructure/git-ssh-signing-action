@@ -66,9 +66,10 @@ async function setWindowsPermissions(
     // For directories: Full control (equivalent to 700)
     // For files: Read/Write (equivalent to 600)
     const permission = isDirectory ? "(F)" : "(R,W)";
+    const currentUser = process.env.USERNAME ?? process.env.USER ?? "Unknown";
     const permissionResult = await exec.exec(
       "icacls",
-      [filePath, "/grant:r", `%USERNAME%:${permission}`],
+      [filePath, "/grant:r", `${currentUser}:${permission}`],
       {
         ignoreReturnCode: true,
         silent: true,

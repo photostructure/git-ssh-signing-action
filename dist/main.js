@@ -27435,7 +27435,8 @@ async function setWindowsPermissions(filePath, isDirectory) {
         // For directories: Full control (equivalent to 700)
         // For files: Read/Write (equivalent to 600)
         const permission = isDirectory ? "(F)" : "(R,W)";
-        const permissionResult = await execExports.exec("icacls", [filePath, "/grant:r", `%USERNAME%:${permission}`], {
+        const currentUser = process.env.USERNAME ?? process.env.USER ?? "Unknown";
+        const permissionResult = await execExports.exec("icacls", [filePath, "/grant:r", `${currentUser}:${permission}`], {
             ignoreReturnCode: true,
             silent: true,
         });
@@ -27471,6 +27472,7 @@ function parseSSHKeyInfoOutput(output) {
  */
 async function getSSHKeyInfo(keyPath) {
     let output = "";
+    let errorOutput = "";
     const result = await execExports.exec("ssh-keygen", ["-l", "-f", keyPath], {
         ignoreReturnCode: true,
         silent: true,
@@ -27478,10 +27480,19 @@ async function getSSHKeyInfo(keyPath) {
             stdout: (data) => {
                 output += data.toString();
             },
+            stderr: (data) => {
+                errorOutput += data.toString();
+            },
         },
     });
     if (result !== 0) {
-        throw new Error("Failed to get SSH key fingerprint");
+        const platformContext = isWindows()
+            ? ` (Windows: ensure Git for Windows is available and key file is accessible)`
+            : "";
+        const errorDetails = errorOutput.trim()
+            ? ` Error: ${errorOutput.trim()}`
+            : "";
+        throw new Error(`Failed to get SSH key fingerprint${platformContext}.${errorDetails}`);
     }
     return parseSSHKeyInfoOutput(output.trim());
 }
@@ -27530,12 +27541,19 @@ async function installSSHKey(context) {
     await setSecurePermissions(resolvedKeyPath, false);
     // Verify key is valid before proceeding
     try {
+        // On Windows, wait a moment for file system to be ready
+        if (isWindows()) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
         await getSSHKeyInfo(resolvedKeyPath);
     }
     catch (error) {
         // Clean up invalid key
         await fs.unlink(resolvedKeyPath).catch(() => { });
-        throw new Error(`Invalid SSH key: ${error instanceof Error ? error.message : String(error)}`);
+        const platformHint = isWindows()
+            ? " (Windows file system or SSH tool compatibility issue)"
+            : "";
+        throw new Error(`Invalid SSH key: ${error instanceof Error ? error.message : String(error)}${platformHint}`);
     }
     // Generate and write public key
     coreExports.debug("Generating public key from private key");

@@ -34,6 +34,7 @@ export function parseSSHKeyInfoOutput(output: string): SSHKeyInfo {
  */
 export async function getSSHKeyInfo(keyPath: string): Promise<SSHKeyInfo> {
   let output = "";
+  let errorOutput = "";
 
   const result = await exec.exec("ssh-keygen", ["-l", "-f", keyPath], {
     ignoreReturnCode: true,
@@ -42,11 +43,22 @@ export async function getSSHKeyInfo(keyPath: string): Promise<SSHKeyInfo> {
       stdout: (data: Buffer) => {
         output += data.toString();
       },
+      stderr: (data: Buffer) => {
+        errorOutput += data.toString();
+      },
     },
   });
 
   if (result !== 0) {
-    throw new Error("Failed to get SSH key fingerprint");
+    const platformContext = isWindows()
+      ? ` (Windows: ensure Git for Windows is available and key file is accessible)`
+      : "";
+    const errorDetails = errorOutput.trim()
+      ? ` Error: ${errorOutput.trim()}`
+      : "";
+    throw new Error(
+      `Failed to get SSH key fingerprint${platformContext}.${errorDetails}`,
+    );
   }
 
   return parseSSHKeyInfoOutput(output.trim());
@@ -108,12 +120,19 @@ export async function installSSHKey(context: Context): Promise<string> {
 
   // Verify key is valid before proceeding
   try {
+    // On Windows, wait a moment for file system to be ready
+    if (isWindows()) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
     await getSSHKeyInfo(resolvedKeyPath);
   } catch (error) {
     // Clean up invalid key
     await fs.unlink(resolvedKeyPath).catch(() => {});
+    const platformHint = isWindows()
+      ? " (Windows file system or SSH tool compatibility issue)"
+      : "";
     throw new Error(
-      `Invalid SSH key: ${error instanceof Error ? error.message : String(error)}`,
+      `Invalid SSH key: ${error instanceof Error ? error.message : String(error)}${platformHint}`,
     );
   }
 
