@@ -57,6 +57,35 @@ steps:
       git-config-scope: global # Works anywhere in workflow
 ```
 
+## What Gets Configured
+
+The action automatically configures Git for SSH signing by setting these config values:
+
+| Config Key                   | Value                       | Effect                                          |
+| ---------------------------- | --------------------------- | ----------------------------------------------- |
+| `user.name`                  | From `git-user-name` input  | Sets commit author name                         |
+| `user.email`                 | From `git-user-email` input | Sets commit author email                        |
+| `gpg.format`                 | `ssh`                       | Tells Git to use SSH signing instead of GPG     |
+| `user.signingkey`            | Path to public key          | Specifies which SSH key to use for signing      |
+| `commit.gpgsign`             | `true` (default)            | **Automatically signs all commits**             |
+| `tag.gpgsign`                | `true` (default)            | **Automatically signs all tags**                |
+| `push.gpgsign`               | `if-asked` (default)        | Signs pushes only if requested by remote server |
+| `gpg.ssh.allowedSignersFile` | (optional)                  | Enables local verification of signatures        |
+
+**Important**: Once configured, you **don't need to add signing flags** to git commands:
+
+```bash
+# These commands will be automatically signed:
+git commit -m "feat: add new feature"
+git tag v1.0.0
+
+# No need for:
+# git commit -S -m "..."  ❌
+# git tag -s v1.0.0       ❌
+```
+
+Automatic signing happens because `commit.gpgsign` and `tag.gpgsign` are set to `true`.
+
 ## Setup (5 Minutes)
 
 ### 1. Generate SSH Key
