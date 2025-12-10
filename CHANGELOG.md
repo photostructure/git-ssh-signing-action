@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### [1.2.0] - 2025-12-10
+
+- ✨ Windows support with proper SSH key permission handling via `icacls`
+- 📦 Clarified `README.md`: you don't need `--gpg-sign` (for `git commit`) or `--sign` (for `git tag`) arguments, as we set both `commit.gpgSign` and `tag.gpgSign` git config flags to true
+- 📦 Updated devDependencies
+
+
 ## [1.1.0] - 2025-08-21
 
 ### Changed
