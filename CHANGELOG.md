@@ -13,7 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 📦 Clarified `README.md`: you don't need `--gpg-sign` (for `git commit`) or `--sign` (for `git tag`) arguments, as we set both `commit.gpgSign` and `tag.gpgSign` git config flags to true
 - 📦 Updated devDependencies
 
-
 ## [1.1.0] - 2025-08-21
 
 ### Changed
