@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [2.0.0] - 2026-03-22
+
+### Breaking
+
+- ⚠️ Minimum Node.js version is now 24 (previously 20). GitHub Actions runners will [enforce Node.js 24 starting June 2nd, 2026](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/).
+
 ### [1.2.0] - 2025-12-10
 
 - ✨ Windows support with proper SSH key permission handling via `icacls`
