@@ -4,7 +4,10 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    // TS6 requires rootDir to be explicit when the inferred common source
+    // directory is ambiguous (TS5011).
+    "rootDir": "./src"
   },
   "exclude": ["__fixtures__", "__tests__", "coverage", "dist", "node_modules"],
   "include": ["src"]

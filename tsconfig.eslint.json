@@ -4,7 +4,12 @@
   "compilerOptions": {
     "allowJs": true,
     "noEmit": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    // TS6 requires rootDir to be explicit when the inferred common source
+    // directory is ambiguous (TS5011); this config spans the repo root.
+    "rootDir": ".",
+    // __tests__ and __fixtures__ use jest's ambient globals, not just @jest/globals.
+    "types": ["node", "jest"]
   },
   "exclude": ["dist", "node_modules"],
   "include": [

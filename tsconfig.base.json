@@ -17,6 +17,9 @@
     "resolveJsonModule": true,
     "strict": true,
     "strictNullChecks": true,
-    "target": "ES2022"
+    "target": "ES2022",
+    // TS6 no longer auto-includes every package in node_modules/@types, so the
+    // ambient globals we rely on (Buffer, process, setTimeout) must be declared.
+    "types": ["node"]
   }
 }
