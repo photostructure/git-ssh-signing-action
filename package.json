@@ -58,7 +58,11 @@
     "package": "npx rollup --config rollup.config.ts --configPlugin \"@rollup/plugin-typescript={tsconfig:'tsconfig.rollup.json'}\"",
     "package:watch": "npm run package -- --watch",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
-    "all": "run-s clean update install:npm fmt lint test package"
+    "typecheck": "run-p typecheck:*",
+    "typecheck:src": "npx tsc -p tsconfig.json --noEmit",
+    "typecheck:tests": "npx tsc -p tsconfig.eslint.json --noEmit",
+    "typecheck:rollup": "npx tsc -p tsconfig.rollup.json --noEmit",
+    "all": "npm i && run-s clean update install:npm fmt lint typecheck test package"
   },
   "license": "MIT",
   "dependencies": {

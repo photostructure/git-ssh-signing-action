@@ -12,6 +12,7 @@ import {
   TEST_ED25519_KEY_INFO_OUTPUT,
   TEST_ED25519_PRIVATE_KEY,
 } from "../__fixtures__/ssh-keys.js";
+import type { Context } from "../src/context.js";
 
 // Mock @actions/core
 jest.unstable_mockModule("@actions/core", () => ({
@@ -177,7 +178,7 @@ describe("ssh.ts", () => {
     });
 
     it("should install SSH key with proper permissions", async () => {
-      const context = {
+      const context: Context = {
         sshSigningKey: TEST_ED25519_PRIVATE_KEY,
         resolvedKeyPath: keyPath,
         publicKeyPath: `${keyPath}.pub`,
@@ -187,6 +188,7 @@ describe("ssh.ts", () => {
         gitCommitGpgSign: true,
         gitTagGpgSign: true,
         gitPushGpgSign: "if-asked",
+        gitConfigScope: "local",
         createAllowedSigners: false,
       };
 
@@ -205,7 +207,7 @@ describe("ssh.ts", () => {
     });
 
     it("should clean up invalid key on failure", async () => {
-      const context = {
+      const context: Context = {
         sshSigningKey: INVALID_PRIVATE_KEY,
         resolvedKeyPath: keyPath,
         publicKeyPath: `${keyPath}.pub`,
@@ -215,6 +217,7 @@ describe("ssh.ts", () => {
         gitCommitGpgSign: true,
         gitTagGpgSign: true,
         gitPushGpgSign: "if-asked",
+        gitConfigScope: "local",
         createAllowedSigners: false,
       };
 

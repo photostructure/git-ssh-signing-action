@@ -110,52 +110,32 @@ describe("Integration Tests", () => {
     ]);
 
     // Set up default mocks
-    (coreModule.getInput as jest.Mock<unknown[], string>).mockImplementation(
-      (name: string) => {
-        switch (name) {
-          case "ssh-signing-key":
-            return TEST_ED25519_PRIVATE_KEY;
-          case "git-user-name":
-            return "Integration Test";
-          case "git-user-email":
-            return "test@example.com";
-          case "ssh-key-path":
-            return sshKeyPath;
-          case "git-push-gpgsign":
-            return "if-asked";
-          default:
-            return "";
-        }
-      },
-    );
-    (
-      coreModule.getBooleanInput as jest.Mock<unknown[], boolean>
-    ).mockReturnValue(true);
-    (coreModule.getState as jest.Mock<unknown[], string>).mockReturnValue("");
-    (coreModule.saveState as jest.Mock<unknown[], void>).mockImplementation(
-      () => {},
-    );
-    (coreModule.setOutput as jest.Mock<unknown[], void>).mockImplementation(
-      () => {},
-    );
-    (coreModule.setFailed as jest.Mock<unknown[], void>).mockImplementation(
-      () => {},
-    );
-    (coreModule.startGroup as jest.Mock<unknown[], void>).mockImplementation(
-      () => {},
-    );
-    (coreModule.endGroup as jest.Mock<unknown[], void>).mockImplementation(
-      () => {},
-    );
-    (coreModule.info as jest.Mock<unknown[], void>).mockImplementation(
-      () => {},
-    );
-    (coreModule.debug as jest.Mock<unknown[], void>).mockImplementation(
-      () => {},
-    );
-    (coreModule.warning as jest.Mock<unknown[], void>).mockImplementation(
-      () => {},
-    );
+    jest.mocked(coreModule.getInput).mockImplementation((name: string) => {
+      switch (name) {
+        case "ssh-signing-key":
+          return TEST_ED25519_PRIVATE_KEY;
+        case "git-user-name":
+          return "Integration Test";
+        case "git-user-email":
+          return "test@example.com";
+        case "ssh-key-path":
+          return sshKeyPath;
+        case "git-push-gpgsign":
+          return "if-asked";
+        default:
+          return "";
+      }
+    });
+    jest.mocked(coreModule.getBooleanInput).mockReturnValue(true);
+    jest.mocked(coreModule.getState).mockReturnValue("");
+    jest.mocked(coreModule.saveState).mockImplementation(() => {});
+    jest.mocked(coreModule.setOutput).mockImplementation(() => {});
+    jest.mocked(coreModule.setFailed).mockImplementation(() => {});
+    jest.mocked(coreModule.startGroup).mockImplementation(() => {});
+    jest.mocked(coreModule.endGroup).mockImplementation(() => {});
+    jest.mocked(coreModule.info).mockImplementation(() => {});
+    jest.mocked(coreModule.debug).mockImplementation(() => {});
+    jest.mocked(coreModule.warning).mockImplementation(() => {});
   });
 
   afterEach(async () => {
@@ -226,14 +206,12 @@ describe("Integration Tests", () => {
       // No need to simulate post-action phase with separate entry points
 
       // Mock the saved state values
-      (coreModule.getState as jest.Mock<unknown[], string>).mockImplementation(
-        (name: string) => {
-          if (name === "isPost") return "true";
-          if (name === "sshKeyPath") return sshKeyPath;
-          if (name === "gitConfigScope") return "local";
-          return "";
-        },
-      );
+      jest.mocked(coreModule.getState).mockImplementation((name: string) => {
+        if (name === "isPost") return "true";
+        if (name === "sshKeyPath") return sshKeyPath;
+        if (name === "gitConfigScope") return "local";
+        return "";
+      });
 
       jest.clearAllMocks();
 
@@ -251,22 +229,20 @@ describe("Integration Tests", () => {
 
   describe("Error scenarios", () => {
     it("should handle invalid SSH key format", async () => {
-      (coreModule.getInput as jest.Mock<unknown[], string>).mockImplementation(
-        (name: string) => {
-          switch (name) {
-            case "ssh-signing-key":
-              return "not-a-valid-ssh-key";
-            case "git-user-name":
-              return "Test User";
-            case "git-user-email":
-              return "test@example.com";
-            case "ssh-key-path":
-              return sshKeyPath;
-            default:
-              return "";
-          }
-        },
-      );
+      jest.mocked(coreModule.getInput).mockImplementation((name: string) => {
+        switch (name) {
+          case "ssh-signing-key":
+            return "not-a-valid-ssh-key";
+          case "git-user-name":
+            return "Test User";
+          case "git-user-email":
+            return "test@example.com";
+          case "ssh-key-path":
+            return sshKeyPath;
+          default:
+            return "";
+        }
+      });
 
       await runSetup();
 
@@ -280,22 +256,20 @@ describe("Integration Tests", () => {
       const restrictedPath = path.join(tempDir, "restricted", "key");
       await fs.mkdir(path.dirname(restrictedPath), { mode: 0o555 });
 
-      (coreModule.getInput as jest.Mock<unknown[], string>).mockImplementation(
-        (name: string) => {
-          switch (name) {
-            case "ssh-signing-key":
-              return TEST_ED25519_PRIVATE_KEY;
-            case "git-user-name":
-              return "Test User";
-            case "git-user-email":
-              return "test@example.com";
-            case "ssh-key-path":
-              return restrictedPath;
-            default:
-              return "";
-          }
-        },
-      );
+      jest.mocked(coreModule.getInput).mockImplementation((name: string) => {
+        switch (name) {
+          case "ssh-signing-key":
+            return TEST_ED25519_PRIVATE_KEY;
+          case "git-user-name":
+            return "Test User";
+          case "git-user-email":
+            return "test@example.com";
+          case "ssh-key-path":
+            return restrictedPath;
+          default:
+            return "";
+        }
+      });
 
       await runSetup();
 
@@ -335,22 +309,20 @@ describe("Integration Tests", () => {
 
     it("should create parent directories if needed", async () => {
       const nestedPath = path.join(tempDir, "deep", "nested", "dir", "key");
-      (coreModule.getInput as jest.Mock<unknown[], string>).mockImplementation(
-        (name: string) => {
-          switch (name) {
-            case "ssh-signing-key":
-              return TEST_ED25519_PRIVATE_KEY;
-            case "git-user-name":
-              return "Test User";
-            case "git-user-email":
-              return "test@example.com";
-            case "ssh-key-path":
-              return nestedPath;
-            default:
-              return "";
-          }
-        },
-      );
+      jest.mocked(coreModule.getInput).mockImplementation((name: string) => {
+        switch (name) {
+          case "ssh-signing-key":
+            return TEST_ED25519_PRIVATE_KEY;
+          case "git-user-name":
+            return "Test User";
+          case "git-user-email":
+            return "test@example.com";
+          case "ssh-key-path":
+            return nestedPath;
+          default:
+            return "";
+        }
+      });
 
       await runSetup();
 

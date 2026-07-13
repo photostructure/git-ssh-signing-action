@@ -1,4 +1,4 @@
-import { parseSSHKeyInfoOutput, SSHKeyInfo } from "../src/ssh";
+import { parseSSHKeyInfoOutput, SSHKeyInfo } from "../src/ssh.js";
 
 describe("parseSSHKeyInfoOutput", () => {
   it("parses a standard ssh-keygen output line", () => {
