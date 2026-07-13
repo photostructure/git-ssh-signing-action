@@ -7,17 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [2.0.1] - 2026-07-13
+
+### Fixed
+
+- 🐛 When an SSH key fails validation, the underlying `ssh-keygen` error is now attached as the error `cause` instead of being discarded. Previously a bare `Invalid SSH key` hid the actual reason the key was rejected, which made CI failures difficult to diagnose.
+
+### Changed
+
+- 📦 Updated GitHub Actions: `checkout`, `setup-node`, and CodeQL
+- 📦 Updated devDependencies, notably eslint 10 and TypeScript 6. eslint 10 has no compatible `eslint-plugin-import` release, so that plugin was dropped — it was registered but contributed no active rules.
+- 📦 Removed the Dependabot configuration in favor of `npm run update`
+- 🔧 `rollup.config.ts` is now actually transpiled during `npm run package`. The config plugin had been pointed at a `tsconfig.json` that excluded it, so Rollup was parsing raw TypeScript — which happened to work only because the config contained no TypeScript-specific syntax.
+- 🔧 `npm run all` now gates on `tsc` typechecking. Nothing had been running the compiler: `ts-jest` is transpile-only under `isolatedModules`, so type errors in the test suite went undetected.
+
+[2.0.1]: https://github.com/photostructure/git-ssh-signing-action/compare/v2.0.0...v2.0.1
+
 ## [2.0.0] - 2026-03-22
 
 ### Breaking
 
 - ⚠️ Minimum Node.js version is now 24 (previously 20). GitHub Actions runners will [enforce Node.js 24 starting June 2nd, 2026](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/).
 
-### [1.2.0] - 2025-12-10
+[2.0.0]: https://github.com/photostructure/git-ssh-signing-action/compare/v1.2.0...v2.0.0
+
+## [1.2.0] - 2025-12-10
 
 - ✨ Windows support with proper SSH key permission handling via `icacls`
 - 📦 Clarified `README.md`: you don't need `--gpg-sign` (for `git commit`) or `--sign` (for `git tag`) arguments, as we set both `commit.gpgSign` and `tag.gpgSign` git config flags to true
 - 📦 Updated devDependencies
+
+[1.2.0]: https://github.com/photostructure/git-ssh-signing-action/compare/v1.1.0...v1.2.0
 
 ## [1.1.0] - 2025-08-21
 
