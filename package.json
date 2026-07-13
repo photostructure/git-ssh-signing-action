@@ -1,10 +1,9 @@
 {
   "name": "git-ssh-signing-action",
   "description": "GitHub Action for setting up git to sign commits and tags with SSH keys in CI/CD workflows",
-  "version": "1.1.0",
   "author": "PhotoStructure",
   "type": "module",
-  "private": false,
+  "private": true,
   "main": "dist/main.js",
   "exports": {
     ".": "./dist/main.js"

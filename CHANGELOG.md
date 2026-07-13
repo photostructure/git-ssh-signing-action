@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 📦 Removed the Dependabot configuration in favor of `npm run update`
 - 🔧 `rollup.config.ts` is now actually transpiled during `npm run package`. The config plugin had been pointed at a `tsconfig.json` that excluded it, so Rollup was parsing raw TypeScript — which happened to work only because the config contained no TypeScript-specific syntax.
 - 🔧 `npm run all` now gates on `tsc` typechecking. Nothing had been running the compiler: `ts-jest` is transpile-only under `isolatedModules`, so type errors in the test suite went undetected.
+- 🔧 `package.json` no longer carries a `version` field, and is marked `private`. This action is distributed as a GitHub Action via git tags and is never published to npm, so the version duplicated the tag with nothing reading it — and had silently drifted, still reading `1.1.0` as of v2.0.0. The git tag is now the sole source of truth.
 
 [2.0.1]: https://github.com/photostructure/git-ssh-signing-action/compare/v2.0.0...v2.0.1
 

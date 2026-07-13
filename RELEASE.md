@@ -41,6 +41,12 @@ Before creating a release, ensure the following repository secrets are configure
 
 ## Version Strategy
 
+There is no version to bump. This action is consumed as a GitHub Action via git
+tags, never published to npm, so `package.json` deliberately carries no
+`version` field (and is marked `private`). The tag you create in step 2 is the
+sole source of truth — don't reintroduce a version field to keep in sync by
+hand, as it will silently drift.
+
 This action follows semantic versioning and maintains floating tags:
 
 - `v1.2.3` - Specific version (immutable)
