@@ -55,7 +55,7 @@
     "fmt": "npx prettier --write .",
     "lint": "npx eslint .",
     "local-action": "npx @github/local-action . src/run.ts .env",
-    "package": "npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "package": "npx rollup --config rollup.config.ts --configPlugin \"@rollup/plugin-typescript={tsconfig:'tsconfig.rollup.json'}\"",
     "package:watch": "npm run package -- --watch",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
     "all": "run-s clean update install:npm fmt lint test package"

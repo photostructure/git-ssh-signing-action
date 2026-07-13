@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    // Rollup compiles this config with its own bundler loader, not Node, so
+    // bundler resolution is what actually applies. It also resolves the
+    // @rollup/plugin-* default exports correctly: those packages ship an
+    // ESM-style `export default` inside a CJS package, which NodeNext types as
+    // a namespace rather than a callable (TS2349).
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "rootDir": "."
+  },
+  "include": ["rollup.config.ts"]
+}
