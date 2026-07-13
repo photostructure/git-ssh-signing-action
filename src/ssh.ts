@@ -133,6 +133,7 @@ export async function installSSHKey(context: Context): Promise<string> {
       : "";
     throw new Error(
       `Invalid SSH key: ${error instanceof Error ? error.message : String(error)}${platformHint}`,
+      { cause: error },
     );
   }
 
